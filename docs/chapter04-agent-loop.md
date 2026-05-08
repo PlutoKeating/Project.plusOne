@@ -1,16 +1,16 @@
-# 🖐️ 第 4 章：小艾学会动手 — Agent 核心循环
+# 🖐️ 第 4 章：加一学会动手 — Agent 核心循环
 
 ## 故事：从"说话"到"做事"
 
-小艾已经能说会道，还能查书了。但用户提出了新需求：
+加一已经能说会道，还能查书了。但用户提出了新需求：
 
-> "小艾，帮我查一下今天的天气。"
-> "小艾，帮我算一下这个月的销售额总和。"
-> "小艾，帮我给张三发一封邮件。"
+> "加一，帮我查一下今天的天气。"
+> "加一，帮我算一下这个月的销售额总和。"
+> "加一，帮我给张三发一封邮件。"
 
-小艾只能回答："抱歉，我只能提供文字回答。"
+加一只能回答："抱歉，我只能提供文字回答。"
 
-项目负责人老张意识到：**光有大脑和知识是不够的，小艾还需要"双手"——也就是执行行动的能力。**
+项目负责人老张意识到：**光有大脑和知识是不够的，加一还需要"双手"——也就是执行行动的能力。**
 
 一个能"做事"的 AI，就是 **Agent（智能体）**。
 
@@ -24,11 +24,11 @@
 Agent = Chatbot + Tools + Loop
 ```
 
-| 组件 | 含义 | 小艾版 |
+| 组件 | 含义 | 加一版 |
 |------|------|--------|
-| **Chatbot** | 能对话的 LLM | 小艾的大脑 |
-| **Tools** | 模型可以调用的外部功能 | 小艾的双手 |
-| **Loop** | 推理 → 行动 → 观察 → 推理的循环 | 小艾的"思考-行动"循环 |
+| **Chatbot** | 能对话的 LLM | 加一的大脑 |
+| **Tools** | 模型可以调用的外部功能 | 加一的双手 |
+| **Loop** | 推理 → 行动 → 观察 → 推理的循环 | 加一的"思考-行动"循环 |
 
 **Agent 的核心不是框架，是循环。**
 
@@ -217,7 +217,7 @@ queries = [
 
 for q in queries:
     print(f"\n\n用户: {q}")
-    print(f"小艾: {run_agent(q)}")
+    print(f"加一: {run_agent(q)}")
 ```
 
 > **注意：** 这个实现是教学用的简化版本。真正的 Agent 框架会用更标准的方式处理工具调用（如 OpenAI 的 `tools` 参数）。但核心逻辑一模一样。
@@ -323,7 +323,7 @@ if assistant_message.tool_calls:
         model="gpt-4o-mini",
         messages=messages,
     )
-    print(f"小艾: {final_response.choices[0].message.content}")
+    print(f"加一: {final_response.choices[0].message.content}")
 ```
 
 ---
@@ -366,6 +366,8 @@ def run_agent(query: str, max_steps: int = 5):
 
 工具调用可能失败：网络超时、API 返回错误、参数不合法。**你的 Agent 应该能优雅地处理失败，而不是直接崩溃。**
 
+> **Anthropic 的研究建议：** 最有效的 Agent 往往是最简单的。从单个 LLM 调用开始，只有在经过验证确实需要时，才逐步引入工具、多 Agent 等复杂度。过度设计的 Agent 不仅难以维护，还容易产生不可预期的行为。
+
 ---
 
 ## 🤖 向 AI 提问
@@ -404,8 +406,18 @@ def run_agent(query: str, max_steps: int = 5):
 - [ ] 能用 OpenAI 标准 `tools` 参数实现 Tool Calling
 - [ ] 理解工具设计的基本原则
 
-> **小艾说：** "太好了！我现在不仅会说话，还会做事了！但是……我的工具管理越来越乱了，每个工具接入方式都不一样。而且我跟用户聊完就忘，完全没有记忆。我需要一个工具箱规范和一个记忆系统。"
+---
+
+## 📚 参考资料
+
+- [Lilian Weng's Agent Blog](https://lilianweng.github.io/posts/2023-06-23-agent/) — Agent 领域的经典参考，系统梳理了规划、记忆、工具使用等核心概念
+- [ReAct Prompting](https://www.promptingguide.ai/techniques/react) — ReAct（推理 + 行动）模式的权威指南
+- [Anthropic: Building Effective Agents](https://www.anthropic.com/engineering/building-effective-agents) — Anthropic 团队关于如何构建高效 Agent 的实践经验
+- [OpenAI Function Calling Docs](https://platform.openai.com/docs/guides/function-calling) — OpenAI 官方 Function Calling 文档
+- [LangChain Agent Concepts](https://python.langchain.com/docs/concepts/agents/) — LangChain 框架中的 Agent 概念与用法
+
+> **加一说：** "太好了！我现在不仅会说话，还会做事了！但是……我的工具管理越来越乱了，每个工具接入方式都不一样。而且我跟用户聊完就忘，完全没有记忆。我需要一个工具箱规范和一个记忆系统。"
 
 ---
 
-**→ 下一步：[第 5 章：小艾的工具箱与记忆库 — Tool, MCP, Memory](chapter05-tool-mcp-memory.md)**
+**→ 下一步：[第 5 章：加一的工具箱与记忆库 — Tool, MCP, Memory](chapter05-tool-mcp-memory.md)**

@@ -67,6 +67,45 @@
 | **JSON** | JavaScript Object Notation | 一种轻量级的数据交换格式，常用于 API 通信 | 贯穿全书 |
 | **Streamlit** | — | 快速搭建 AI 应用界面的 Python 框架 | 第3章 |
 
+## Framework 框架相关
+
+| 术语 | 英文 | 一句话解释 | 出现在 |
+|------|------|-----------|--------|
+| **LangChain** | — | 最流行的 LLM 应用开发框架，提供链式调用和 Agent 抽象 | 第4/6章 |
+| **LangGraph** | — | LangChain 的图结构 Agent 编排框架 | 第6章 |
+| **LlamaIndex** | — | 专注于 RAG 和数据索引的框架 | 第3章 |
+| **Streamlit** | — | 快速搭建 AI 应用界面的 Python 框架 | 第3章 |
+| **CrewAI** | — | 多 Agent 协作框架 | 第6章 |
+| **AutoGen** | — | 微软的多 Agent 对话框架 | 第6章 |
+
+## Prompt 工程相关
+
+| 术语 | 英文 | 一句话解释 | 出现在 |
+|------|------|-----------|--------|
+| **零样本提示** | Zero-Shot Prompting | 不给示例，直接让 LLM 执行任务 | 附录 |
+| **思维链** | Chain-of-Thought (CoT) | 让 LLM 分步推理的技术 | 附录 |
+| **角色提示** | Role Prompting | 给 LLM 分配身份角色来优化回答 | 附录 |
+| **提示注入** | Prompt Injection | 通过用户输入篡改系统指令的攻击方式 | 附录 |
+| **TCOF 框架** | Task-Context-Output-Format | Prompt 设计的四要素框架 | 附录 |
+| **提示缓存** | Prompt Caching | 缓存重复的 Prompt 部分以减少 API 成本 | 附录 |
+
+## 模型与训练相关
+
+| 术语 | 英文 | 一句话解释 | 出现在 |
+|------|------|-----------|--------|
+| **微调** | Fine-tuning | 在预训练模型上用特定数据继续训练，改变模型行为 | 第7章 |
+| **蒸馏** | Distillation | 用大模型教小模型，让小模型获得大模型的能力 | 附录 |
+| **开源模型** | Open-Source Model | 可以自由下载和修改的模型（如 Llama, Qwen） | 第2章 |
+| **上下文学习** | In-Context Learning | 通过 Prompt 中的示例让 LLM 学会新任务，不改变参数 | 附录 |
+
 ---
 
 > **提示：** 遇到不认识的术语时，随时回来看这里。每章末尾的"检查清单"中涉及的术语都在本表中有收录。
+
+---
+
+## 📚 参考资料
+
+- [Prompt Engineering Guide](https://www.promptingguide.ai/) - source for many prompt engineering terms
+- [Python official glossary](https://docs.python.org/3/glossary.html)
+- [OpenAI developer docs](https://developers.openai.com/) - source for API terms

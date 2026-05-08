@@ -229,8 +229,8 @@ def run_agent(query: str, max_steps: int = 5) -> str:
 ```python
 import streamlit as st
 
-st.set_page_config(page_title="小艾助手", layout="wide")
-st.title("🤖 小艾助手")
+st.set_page_config(page_title="加一助手", layout="wide")
+st.title("🤖 加一助手")
 
 # 侧边栏
 with st.sidebar:
@@ -241,7 +241,7 @@ with st.sidebar:
 # 主区域
 query = st.text_input("输入你的问题：")
 if query:
-    with st.spinner("小艾正在思考..."):
+    with st.spinner("加一正在思考..."):
         # 你的逻辑
         st.success("回答内容")
 ```
@@ -262,3 +262,12 @@ if query:
 ---
 
 > **💡 提示：** 将此页面保存为浏览器书签，开发时随时查阅。
+
+---
+
+## 📚 参考资料
+
+- [OpenAI API docs](https://platform.openai.com/docs/) - for API reference
+- [Streamlit docs](https://docs.streamlit.io/)
+- [FAISS GitHub](https://github.com/facebookresearch/faiss)
+- [ChromaDB docs](https://docs.trychroma.com/)

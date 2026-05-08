@@ -1,14 +1,14 @@
-# 👁️ 第 2 章：小艾睁开双眼 — 第一次 LLM API 调用
+# 👁️ 第 2 章：加一睁开双眼 — 第一次 LLM API 调用
 
 ## 故事：连接大脑
 
-小艾有了身体（Python 环境），但现在的她就像一个没有接通大脑的躯体——她可以执行指令，但她没有"智能"。
+加一有了身体（Python 环境），但现在的她就像一个没有接通大脑的躯体——她可以执行指令，但她没有"智能"。
 
 项目负责人老张在服务器机房里，小心翼翼地插上了一根**看不见的线**。这根线的另一端，连接着世界上最强大大脑之一——一个训练有素的大语言模型（LLM）。
 
-"好了，"老张说，"小艾，你现在可以**看到**这个世界了。"
+"好了，"老张说，"加一，你现在可以**看到**这个世界了。"
 
-小艾的第一次"睁眼"，就是通过 **API（应用程序编程接口）** 向 LLM 发送第一个请求，并收到回应。
+加一的第一次"睁眼"，就是通过 **API（应用程序编程接口）** 向 LLM 发送第一个请求，并收到回应。
 
 这个过程，是整条 AI 应用开发之路的**基石**。没有这一步，后面的一切都是空中楼阁。
 
@@ -79,7 +79,7 @@ response = client.chat.completions.create(
     model="gpt-4o-mini",  # 或你可用的任何模型
     messages=[
         {"role": "system", "content": "你是一个友好的助手，请用中文回答。"},
-        {"role": "user", "content": "你好，我是小艾，请问你能告诉我，我该怎么成为一个有用的 AI 助手吗？"},
+        {"role": "user", "content": "你好，我是加一，请问你能告诉我，我该怎么成为一个有用的 AI 助手吗？"},
     ],
     temperature=0.7,
 )
@@ -95,7 +95,7 @@ python first_call.py
 
 **如果看到一段 AI 的回答文字印在终端上——恭喜，你成功了。**
 
-这是你和小艾共同的"第一次睁眼"。
+这是你和加一共同的"第一次睁眼"。
 
 ---
 
@@ -128,11 +128,15 @@ messages = [
 
 **System Prompt 就是给 AI 的"岗位说明书"。** 它决定了 AI 以什么角色、什么风格、什么约束条件来回答你。这是后续所有 Agent 构建的基础。
 
+> **Temperature 选择参考：** 对于需要确定性输出的场景（代码生成、分类、事实提取），使用 temperature 0-0.3；对于创意写作和头脑风暴，使用 0.7-1.0。
+
+> **Prompt 入门心法：** 初学者写提示词时，记住一条原则——"说你要什么，不要说你不要什么"。正面指令比禁止性指令更有效。
+
 ---
 
 ## 进阶：做一个命令行对话脚本
 
-创建一个 `chat_terminal.py`，让你可以和小艾持续对话：
+创建一个 `chat_terminal.py`，让你可以和加一持续对话：
 
 ```python
 import os
@@ -146,15 +150,15 @@ client = OpenAI(
 )
 
 messages = [
-    {"role": "system", "content": "你是小艾，一个正在成长的 AI 助手。你友善、耐心，用中文回答。"},
+    {"role": "system", "content": "你是加一，一个正在成长的 AI 助手。你友善、耐心，用中文回答。"},
 ]
 
-print("🤖 小艾聊天终端（输入 '退出' 结束）\n")
+print("🤖 加一聊天终端（输入 '退出' 结束）\n")
 
 while True:
     user_input = input("你: ")
     if user_input.lower() in ["退出", "exit", "quit"]:
-        print("小艾: 再见！我会继续成长的。")
+        print("加一: 再见！我会继续成长的。")
         break
     
     messages.append({"role": "user", "content": user_input})
@@ -166,7 +170,7 @@ while True:
     )
     
     reply = response.choices[0].message.content
-    print(f"小艾: {reply}\n")
+    print(f"加一: {reply}\n")
     
     messages.append({"role": "assistant", "content": reply})
 ```
@@ -248,8 +252,19 @@ client = OpenAI(
 - [ ] 能写一个带上下文记忆的多轮对话脚本
 - [ ] 能处理常见的 API 调用错误
 
-> **小艾说：** "我能看见了！这个世界充满了文字和信息。但我发现，我只能凭我训练时的记忆回答问题。如果我遇到不知道的事情，我会编造答案——这不好。我需要一个图书馆，让我能查资料再回答。"
+> **加一说：** "我能看见了！这个世界充满了文字和信息。但我发现，我只能凭我训练时的记忆回答问题。如果我遇到不知道的事情，我会编造答案——这不好。我需要一个图书馆，让我能查资料再回答。"
 
 ---
 
-**→ 下一步：[第 3 章：小艾学会读书 — RAG 从零到 Demo](chapter03-rag-from-scratch.md)**
+## 📚 本章参考资料
+
+- [OpenAI Chat Completions API 官方文档](https://platform.openai.com/docs/api-reference/chat/create)
+- [OpenAI Cookbook — 官方示例和最佳实践](https://cookbook.openai.com/)
+- [Prompt Engineering Guide — 提示工程全面指南](https://www.promptingguide.ai/)
+- [OpenAI 官方：Prompt Engineering 最佳实践](https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-openai-api)
+- [LLM 参数设置详解（Temperature / Top-p）](https://www.promptingguide.ai/introduction/settings)
+- [提示词设计技巧](https://www.promptingguide.ai/introduction/tips)
+
+---
+
+**→ 下一步：[第 3 章：加一学会读书 — RAG 从零到 Demo](chapter03-rag-from-scratch.md)**

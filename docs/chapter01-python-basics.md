@@ -1,10 +1,10 @@
-# 🧱 第 1 章：打造小艾的身体 — Python 快速起步
+# 🧱 第 1 章：打造加一的身体 — Python 快速起步
 
-## 故事：小艾需要一具"身体"
+## 故事：加一需要一具"身体"
 
-小艾要成为一个 AI 助手，首先需要一具能够执行指令的"身体"。
+加一要成为一个 AI 助手，首先需要一具能够执行指令的"身体"。
 
-想象一下：小艾是一个婴儿，她的大脑（我们之后会用 LLM 来充当）是世界上最聪明的大脑之一，但她现在连"动一下手指"都做不到。她需要一个能理解指令、执行动作、与世界交互的载体。
+想象一下：加一是一个婴儿，她的大脑（我们之后会用 LLM 来充当）是世界上最聪明的大脑之一，但她现在连"动一下手指"都做不到。她需要一个能理解指令、执行动作、与世界交互的载体。
 
 在 AI 开发的世界里，**Python 就是这个载体**。
 
@@ -42,7 +42,7 @@ Python 之于 AI 开发者，就像身体之于灵魂——它是你所有想法
 
 ```python
 # 你只需要知道这几种类型
-name = "小艾"             # 字符串 str
+name = "加一"             # 字符串 str
 age = 0                   # 整数 int  
 temperature = 0.7         # 浮点数 float
 tools = ["搜索", "计算"]   # 列表 list
@@ -50,7 +50,7 @@ config = {"model": "gpt-4", "key": "sk-xxx"}  # 字典 dict
 is_ready = False           # 布尔 bool
 
 # print() 是你最好的调试朋友
-print(f"小艾的年龄: {age}, 准备就绪: {is_ready}")
+print(f"加一的年龄: {age}, 准备就绪: {is_ready}")
 ```
 
 ### 2. 字符串操作 — 你用得最多
@@ -116,8 +116,118 @@ def safe_api_call(url: str):
     except requests.exceptions.Timeout:
         return {"error": "请求超时了"}
     except requests.exceptions.RequestException as e:
-        return {"error": f"请求失败: {e}"}
+         return {"error": f"请求失败: {e}"}
 ```
+
+### 6. JSON 解析 — LLM API 返回的核心数据格式
+
+```python
+import json
+
+# 模拟一个 LLM API 的返回结果
+api_response = '''
+{
+  "id": "chatcmpl-abc123",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "你好！我是加一，有什么可以帮你的？"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 15,
+    "completion_tokens": 20,
+    "total_tokens": 35
+  }
+}
+'''
+
+# 解析 JSON 字符串
+data = json.loads(api_response)
+
+# 提取 LLM 的回复内容
+reply = data["choices"][0]["message"]["content"]
+tokens_used = data["usage"]["total_tokens"]
+
+print(f"加一说: {reply}")
+print(f"本次消耗 token: {tokens_used}")
+
+# 将 Python 对象转回 JSON 字符串（发送请求时用）
+new_request = {
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "你好"}]
+}
+json_str = json.dumps(new_request, ensure_ascii=False)
+print(json_str)
+```
+
+### 7. datetime — 时间处理，日志与 Token 过期判断必备
+
+```python
+from datetime import datetime, timedelta
+import time
+
+# 获取当前时间
+now = datetime.now()
+print(f"当前时间: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+
+# API Key 的过期时间判断
+token_expires_at = datetime(2025, 6, 1, 12, 0, 0)
+if now > token_expires_at:
+    print("⚠️ API Key 已过期！请更换新的 Key。")
+else:
+    remaining = token_expires_at - now
+    print(f"✅ API Key 有效，剩余 {remaining.days} 天。")
+
+# 计算 API 响应时间（做性能调试时常用）
+start_time = time.time()
+time.sleep(0.5)  # 模拟一次 API 调用
+elapsed = time.time() - start_time
+print(f"API 调用耗时: {elapsed:.2f} 秒")
+```
+
+---
+
+## 🐍 虚拟环境：给加一一个干净的工作空间
+
+在真实项目中，不同项目可能依赖同一个库的不同版本。**虚拟环境**就是为每个项目创建一个独立的 Python 运行环境，互不干扰。
+
+### Windows / macOS / Linux 通用步骤
+
+```bash
+# 1. 创建项目文件夹
+mkdir xiaoai-project
+cd xiaoai-project
+
+# 2. 创建虚拟环境（Windows 用 python，macOS/Linux 用 python3）
+python -m venv venv
+
+# 3. 激活虚拟环境
+#    Windows (PowerShell):
+venv\Scripts\Activate.ps1
+#    如果报错，先执行: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+#
+#    Windows (CMD):
+venv\Scripts\activate.bat
+#
+#    macOS / Linux:
+source venv/bin/activate
+
+# 4. 确认激活成功——终端提示符前会出现 (venv)：
+#    (venv) C:\Users\...\xiaoai-project>
+
+# 5. 安装依赖（比如 requests）
+pip install requests
+
+# 6. 退出虚拟环境（用完可以退出）
+deactivate
+```
+
+> **💡 习惯养成：** 每开始一个新项目，第一步就是 `python -m venv venv`。这是职业开发者的肌肉记忆。
 
 ---
 
@@ -127,11 +237,11 @@ def safe_api_call(url: str):
 
 ```python
 print("=" * 50)
-print("小艾的初始化程序")
+print("加一的初始化程序")
 print("=" * 50)
 
-# 小艾的基本信息
-name = "小艾"
+# 加一的基本信息
+name = "加一"
 version = "0.0.1"
 skills = ["对话", "查资料", "做计算"]
 
@@ -141,12 +251,12 @@ print(f"🎯 技能: {', '.join(skills)}")
 
 # 一个简单的对话模拟
 while True:
-    user_input = input("\n💬 你对小艾说: ")
+    user_input = input("\n💬 你对加一说: ")
     if user_input == "退出":
-        print("小艾: 再见！")
+        print("加一: 再见！")
         break
     
-    response = f"小艾: 你说的是「{user_input}」对吗？我现在还在学习中，等学会调用 API 就能真正回答你了。"
+    response = f"加一: 你说的是「{user_input}」对吗？我现在还在学习中，等学会调用 API 就能真正回答你了。"
     print(response)
 ```
 
@@ -203,8 +313,17 @@ python hello_xiaoai.py
 - [ ] 能用 `requests` 库发送 HTTP 请求
 - [ ] 运行了 `hello_xiaoai.py` 并看到了输出
 
-> **小艾说：** "身体搭好了，下一步让我睁开眼睛——看看这个世界吧！"
+> **加一说：** "身体搭好了，下一步让我睁开眼睛——看看这个世界吧！"
 
 ---
 
-**→ 下一步：[第 2 章：小艾睁开双眼 — 第一次 LLM API 调用](chapter02-first-api-call.md)**
+## 📚 本章参考资料
+
+- [Python 官方教程](https://docs.python.org/3/tutorial/) — 最权威的 Python 入门指南，一步步带你掌握语言核心
+- [Real Python](https://realpython.com/) — 高质量 Python 教程，从基础到高级，所有代码均可在线运行
+- [W3Schools Python Tutorial](https://www.w3schools.com/python/) — 零基础友好的交互式 Python 学习平台
+- [LearnPython.org](https://www.learnpython.org/) — 免费在线交互式 Python 教程，无需安装，浏览器即学即练
+
+---
+
+**→ 下一步：[第 2 章：加一睁开双眼 — 第一次 LLM API 调用](chapter02-first-api-call.md)**

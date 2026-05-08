@@ -1,23 +1,23 @@
-# 📚 第 3 章：小艾学会读书 — RAG 从零到 Demo
+# 📚 第 3 章：加一学会读书 — RAG 从零到 Demo
 
-## 故事：小艾的图书馆
+## 故事：加一的图书馆
 
-小艾虽然能说话了，但项目负责人老张很快发现了一个严重的问题：
+加一虽然能说话了，但项目负责人老张很快发现了一个严重的问题：
 
-**小艾会"编造答案"。**
+**加一会"编造答案"。**
 
 用户问："我们公司 2024 年的财报数据是多少？"
-小艾回答了一个看起来很专业、但完全是虚构的数字。
+加一回答了一个看起来很专业、但完全是虚构的数字。
 
 这在 AI 领域被称为 **幻觉（Hallucination）** 。模型本质上是一个"高级文字接龙机器"，它没有实时数据，不知道你私有的知识，遇到不知道的事情，它会"自信地胡说"。
 
-老张的解决方案是：**给小艾建一个图书馆。**
+老张的解决方案是：**给加一建一个图书馆。**
 
 这个图书馆，就是 **RAG（Retrieval-Augmented Generation，检索增强生成）**。
 
 它的工作原理很简单：
 1. 用户问问题
-2. 小艾先去图书馆查找相关文档
+2. 加一先去图书馆查找相关文档
 3. 基于查到的资料，再生成回答
 
 就像考试时，从"闭卷"变成了"开卷"。
@@ -78,7 +78,7 @@ pip install openai faiss-cpu sentence-transformers python-dotenv
 
 ```
 深智科技成立于 2020 年，总部位于北京，是一家专注于 AI 助手开发的公司。
-公司的核心产品是"小艾"智能助手，支持对话、检索和工具调用。
+公司的核心产品是"加一"智能助手，支持对话、检索和工具调用。
 2024 年公司营收为 5000 万元，同比增长 120%。
 团队目前有 80 人，其中研发占 60%。
 公司的使命是"让每个企业都拥有自己的 AI 助手"。
@@ -200,7 +200,7 @@ client = OpenAI(
     base_url=os.getenv("OPENAI_BASE_URL"),
 )
 
-st.title("📚 小艾的 RAG 知识库")
+st.title("📚 加一的 RAG 知识库")
 st.write("上传文档，然后基于文档内容提问")
 
 # 初始化 Embedding 模型
@@ -259,7 +259,7 @@ if query and st.session_state.index is not None:
         temperature=0.3,
     )
     
-    st.subheader("🤖 小艾的回答")
+    st.subheader("🤖 加一的回答")
     st.write(response.choices[0].message.content)
 elif query and st.session_state.index is None:
     st.warning("请先上传文档")
@@ -286,6 +286,8 @@ streamlit run rag_demo.py
 | 多轮对话中的 RAG | 在对话上下文中结合检索 | 体验更连贯 |
 
 > **✅ 先做成，再做好。** 没有一个优化值得你花一周时间在第一个 Demo 上。
+
+> **"Lost in the Middle" 现象：** LLM 存在"迷失在中段"的问题——当上下文过长时，模型倾向于忽略中间位置的信息，而更关注开头和结尾。这也是为什么 RAG（只检索最相关的几段文本）比简单地把所有文档塞进 Prompt 效果更好的核心原因之一。
 
 ---
 
@@ -325,8 +327,20 @@ streamlit run rag_demo.py
 - [ ] 能用 Streamlit 搭建可视化 Demo
 - [ ] 理解为什么 RAG 能减少幻觉
 
-> **小艾说：** "太好了，我有了自己的图书馆！现在我可以查资料再回答了，不会再瞎编了。但是……我只能动口，不能动手。用户想让我帮忙发邮件、查天气、算数据，我都做不到。没有人教我怎么'做事'。"
+> **加一说：** "太好了，我有了自己的图书馆！现在我可以查资料再回答了，不会再瞎编了。但是……我只能动口，不能动手。用户想让我帮忙发邮件、查天气、算数据，我都做不到。没有人教我怎么'做事'。"
 
 ---
 
-**→ 下一步：[第 4 章：小艾学会动手 — Agent 核心循环](chapter04-agent-loop.md)**
+## 📚 本章参考资料
+
+- [Pinecone — RAG 系列教程](https://www.pinecone.io/learn/series/rag/)
+- [Pinecone — 文档分块策略详解](https://www.pinecone.io/learn/chunking-strategies/)
+- [LangChain — RAG 教程](https://python.langchain.com/docs/tutorials/rag/)
+- [LlamaIndex — RAG 核心概念](https://docs.llamaindex.ai/en/stable/understanding/rag/)
+- [MTEB Leaderboard — Embedding 模型排行榜](https://huggingface.co/spaces/mteb/leaderboard)
+- [Ragas — RAG 系统评估框架](https://docs.ragas.io/)
+- [论文：Lost in the Middle — 长上下文中的检索问题](https://arxiv.org/abs/2307.03172)
+
+---
+
+**→ 下一步：[第 4 章：加一学会动手 — Agent 核心循环](chapter04-agent-loop.md)**

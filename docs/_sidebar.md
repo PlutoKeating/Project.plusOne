@@ -1,4 +1,4 @@
-- [📖 序章：小艾的诞生](README.md)
+- [📖 序章：加一的诞生](README.md)
 - [🧱 第1章：Python 快速起步](chapter01-python-basics.md)
 - [👁️ 第2章：第一次 LLM API 调用](chapter02-first-api-call.md)
 - [📚 第3章：RAG 从零到 Demo](chapter03-rag-from-scratch.md)
@@ -9,3 +9,4 @@
 - [📎 附录：Prompt 工程手册](appendix-prompt-engineering.md)
 - [📖 术语表 Glossary](glossary.md)
 - [⚡ 速查表 Cheatsheet](cheatsheet.md)
+- [🐛 故障排查 FAQ](troubleshooting.md)

@@ -333,10 +333,22 @@ F - Format（格式）: 给定期望的格式结构
 
 你的第一个 Prompt 可能不完美，没关系。**每次用 AI 都是练习 Prompt Engineering 的机会。**
 
-记住小艾的座右铭：
+记住加一的座右铭：
 
 > **"先跑通，再优化。先做成，再做好。"**
 
 ---
 
 **🏁 你已经完成了整个教程！现在，去创造属于你自己的 AI Agent 吧！**
+
+---
+
+## 📚 参考资料
+
+- [Prompt Engineering Guide](https://www.promptingguide.ai/) - comprehensive
+- [IBM Prompt Engineering Guide 2026](https://www.ibm.com/think/topics/prompt-engineering-guide)
+- [Anthropic's building effective agents](https://www.anthropic.com/engineering/building-effective-agents)
+- [Lilian Weng - Prompt Engineering](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
+- [AI Engineer Lab Prompt Guide 2026](https://aiengineerlab.in/prompt/guide/)
+- [DigitalOcean Prompt Engineering Best Practices](https://digitalocean.com/resources/article/prompt-engineering-best-practices)
+- [DecryptPrompt（中文Prompt工程资源）](https://github.com/DSXiangLi/DecryptPrompt)

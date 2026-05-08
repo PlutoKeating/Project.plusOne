@@ -1,8 +1,8 @@
-# 🚀 第 7 章：小艾毕业了 — 项目实战清单 & 面试准备
+# 🚀 第 7 章：加一毕业了 — 项目实战清单 & 面试准备
 
 ## 故事：找工作
 
-经过前面六章的成长，小艾已经不是当初那个只会复读的"婴儿"了。
+经过前面六章的成长，加一已经不是当初那个只会复读的"婴儿"了。
 
 她：
 - ✅ 能理解人类语言（LLM API）
@@ -15,7 +15,7 @@
 
 真正区分"学过"和"能做"的，是**项目**。
 
-> **小艾问老张：** "我要去找工作了，面试官会问我什么？"
+> **加一问老张：** "我要去找工作了，面试官会问我什么？"
 >
 > **老张：** "面试官不会问你'什么是 Agent'，他会问你'你做过什么 Agent 项目，遇到了什么问题，怎么解决的'。"
 
@@ -108,6 +108,64 @@
 > 独立设计与开发 [场景] AI 助手，整合 RAG + Agent + 工具调用技术栈，支撑 [业务指标] 提效 XX%，获得 [团队/客户] 正面反馈。
 
 ---
+
+> **💡 选项目的一个建议：** 选择一个你真正关心的领域——无论是游戏、金融、教育、医疗还是任何一个你热爱的方向。热情会让你在调试到凌晨 2 点时依然想"再看一个 bug"，也会在面试中自然流露——面试官一眼就能看出你是真的热爱这个领域，而不只是"完成了一个作业"。
+
+## 项目目录结构建议
+
+一个清晰的项目结构能让代码更易维护、面试时更有说服力。推荐遵循以下目录组织方式：
+
+```
+my-ai-project/
+├── .env                  # API Key 等敏感信息（别提交）
+├── .env.example          # 环境变量模板（可提交）
+├── .gitignore            # Git 忽略规则
+├── requirements.txt      # 依赖列表
+├── README.md             # 项目说明
+├── src/
+│   ├── __init__.py
+│   ├── config.py         # 配置管理
+│   ├── llm.py            # LLM 调用封装
+│   ├── tools.py          # 工具注册
+│   ├── memory.py         # 记忆系统
+│   ├── agent.py          # Agent 循环
+│   └── rag.py            # RAG 逻辑
+├── data/                 # 数据文件
+│   └── knowledge_base/
+├── tests/                # 测试文件
+│   └── test_agent.py
+├── ui/                   # 前端界面
+│   └── app.py            # Streamlit / Gradio
+└── notebooks/            # 实验性 Jupyter Notebook
+    └── experiments.ipynb
+```
+
+**各目录/文件说明：**
+
+- **`.env`** — 存放 API Key、数据库密码等敏感配置。**绝对不能提交到 Git**，必须加入 `.gitignore`。
+- **`.env.example`** — 环境变量模板，列出需要哪些变量（不包含真实密钥），方便其他开发者参考。
+- **`.gitignore`** — 指定 Git 忽略的文件和目录（`.env`、`__pycache__/`、`venv/` 等）。
+- **`requirements.txt`** — Python 依赖列表，运行 `pip install -r requirements.txt` 即可安装全部依赖。
+- **`README.md`** — 项目介绍、安装步骤、运行方式、架构说明。面试时是第一个给面试官看的文档。
+- **`src/config.py`** — 集中管理所有配置项（从环境变量读取），避免配置散落各处。
+- **`src/llm.py`** — 封装 LLM API 调用（OpenAI / 其他），统一处理错误、重试、Token 统计。
+- **`src/tools.py`** — 注册所有工具的定义和执行函数，Agent 从这里发现和调用工具。
+- **`src/memory.py`** — 短期记忆（滑动窗口）、长期记忆（总结/检索）的实现。
+- **`src/agent.py`** — Agent 的核心循环：接收任务 → 思考 → 调工具 → 观察 → 继续，直到完成。
+- **`src/rag.py`** — 文档加载、切块、Embedding、向量库检索、重排序等 RAG 全链路逻辑。
+- **`data/`** — 存放文档、知识库数据、离线文件等，与代码分离。
+- **`tests/`** — 单元测试和集成测试，保证代码质量。
+- **`ui/`** — 前端 Demo，使用 Streamlit 或 Gradio 快速搭建交互界面。
+- **`notebooks/`** — Jupyter Notebook 实验文件，用于探索性分析和原型验证。
+
+> **安全红线提醒：** `.env` 文件必须在 `.gitignore` 中列出。一旦 API Key 泄露到公开仓库，攻击者可能在几分钟内用你的密钥产生巨额账单。建议 `.gitignore` 至少包含：
+> ```
+> .env
+> .venv/
+> __pycache__/
+> *.pyc
+> .DS_Store
+> ```
 
 ## 面试高频问题 TOP 20
 
@@ -252,12 +310,25 @@ AI 应用开发
 2. **做过才算懂** — 完整做过一个项目，你才知道坑在哪里
 3. **能讲清才算真掌握** — 如果你不能用简单的话解释清楚一个概念，那你还没真正理解
 
-> **小艾的最后一句话：**
+> **加一的最后一句话：**
 >
 > "从一个小婴儿，到现在能带团队做项目，这一路走来最感谢的是你——是你一行一行代码把我搭起来的。
 >
-> 现在，轮到你去创造你自己的'小艾'了。"
+> 现在，轮到你去创造你自己的'加一'了。"
 >
 > **🚀 去写出你的第一个 Agent 吧。**
+
+---
+
+## 📚 参考资料
+
+- https://github.com/ — GitHub，搜索 "RAG" 和 "AI agent" 开源项目获取灵感
+- https://streamlit.io/gallery — Streamlit 官方作品集，寻找 UI 设计灵感
+- https://gradio.app/ — Gradio，适合 AI Demo 的 Streamlit 替代方案
+- https://www.linkedin.com/ — LinkedIn，搜索 AI 工程师职位描述，了解雇主真实需求
+- https://github.com/DSXiangLi/DecryptPrompt — 中文 AI Prompt 工程资源合集
+- https://github.com/datawhalechina — DataWhale，中文 AI 学习社区
+
+---
 
 **→ 附录：[AI 辅助学习指南 & Prompt 工程手册](appendix-prompt-engineering.md)**
