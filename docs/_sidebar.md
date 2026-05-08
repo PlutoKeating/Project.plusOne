@@ -1,6 +1,7 @@
 - [📖 序章：加一的诞生](README.md)
 - [🧱 第1章：Python 快速起步](ch01/)
 - [👁️ 第2章：第一次 LLM API 调用](ch02/)
+  - [附加阅读：加一的聪明大脑是如何理解世界的？—— transformer开天辟地一般的self-attention架构](ch02/extra-01-self-attention.md)
 - [📚 第3章：RAG 从零到 Demo](ch03/)
 - [🖐️ 第4章：Agent 核心循环](ch04/)
 - [🧰 第5章：Tool / MCP / Memory](ch05/)
