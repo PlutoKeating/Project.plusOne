@@ -56,6 +56,35 @@
 
 ### 3. 技术细节原理：图解中的六个公式
 
+```mermaid
+graph TD
+    subgraph Self-Attention 核心流程
+        direction TB
+        X[输入 Input X] -->|乘以 W_Q, W_K, W_V| QKV(投影矩阵)
+        
+        QKV --> Q[Query矩阵 Q]
+        QKV --> K[Key矩阵 K]
+        QKV --> V[Value矩阵 V]
+        
+        Q --> MatMul1((点积相乘))
+        K -->|转置 K^T| MatMul1
+        
+        MatMul1 -->|q·k| Scale(缩放 Scale /√D)
+        Scale -->|对齐分数 E| Softmax[Softmax 函数]
+        
+        Softmax -->|注意力权重 A| MatMul2((加权求和))
+        V --> MatMul2
+        
+        MatMul2 --> Y[输出 Output Y]
+    end
+
+    style X fill:#f9f,stroke:#333,stroke-width:2px
+    style Y fill:#bbf,stroke:#333,stroke-width:2px
+    style Q fill:#fcc,stroke:#333
+    style K fill:#cfc,stroke:#333
+    style V fill:#ccf,stroke:#333
+```
+
 让我们对照图片，逐层拆解：
 
 #### 输入层
@@ -67,9 +96,9 @@ Input vectors: x (shape: N × D)
 
 #### 第一步：生成 Q、K、V（三个投影变换）
 
-Key vectors:   k = xW_k
-Value vectors: v = xW_v  
-Query vectors: q = xW_q
+$$ K = X W_k $$
+$$ V = X W_v $$
+$$ Q = X W_q $$
 
 **原理**：
 - 每个输入词 x 分别乘以三个可学习的权重矩阵 W_k、W_v、W_q
@@ -82,7 +111,7 @@ Query vectors: q = xW_q
 
 #### 第二步：计算对齐分数（Alignment）
 
-Alignment: e_{i,j} = q_j · k_i / √D
+Alignment: $e_{i,j} = \frac{q_j \cdot k_i}{\sqrt{D}}$
 
 **原理**：
 - 图中 e₀₀, e₀₁...e₂₂ 构成一个 3×3 的分数矩阵
@@ -96,7 +125,7 @@ Alignment: e_{i,j} = q_j · k_i / √D
 
 #### 第三步：Softmax 归一化（Attention 权重）
 
-Attention: a = softmax(e)
+Attention: $a_{i,j} = \text{softmax}(e_{i,j})$
 
 **原理**：
 - 对每一列（每个 Query 对应的分数）做 softmax
@@ -108,7 +137,7 @@ Attention: a = softmax(e)
 
 #### 第四步：加权聚合（Output）
 
-Output: y_j = Σ_i a_{i,j} v_i
+Output: $y_j = \sum_{i} a_{i,j} v_i$
 
 **原理**：
 - 每个输出 y_j 是所有 Value 的加权平均
@@ -126,29 +155,51 @@ Output: y_j = Σ_i a_{i,j} v_i
 
 ### 4. 全链路工作流程（以图中 3 词句子为例）
 
-输入: [x₀="我", x₁="喜欢", x₂="AI"]
+输入: $X = [x_0, x_1, x_2]$ (分别对应 "我", "喜欢", "AI")
 
-        ↓ 线性投影
-Q = [q₀, q₁, q₂]  (我想了解什么)
-K = [k₀, k₁, k₂]  (我能提供什么匹配信息)  
-V = [v₀, v₁, v₂]  (我实际携带的语义内容)
+**1. 线性投影**
 
-        ↓ 计算相似度
-        e₀₀  e₀₁  e₀₂    ← q₀ 与所有 k 的匹配度
-        e₁₀  e₁₁  e₁₂    ← q₁ 与所有 k 的匹配度
-        e₂₀  e₂₁  e₂₂    ← q₂ 与所有 k 的匹配度
+$$
+Q = \begin{bmatrix} q_0 \\\\ q_1 \\\\ q_2 \end{bmatrix}, 
+K = \begin{bmatrix} k_0 \\\\ k_1 \\\\ k_2 \end{bmatrix}, 
+V = \begin{bmatrix} v_0 \\\\ v_1 \\\\ v_2 \end{bmatrix}
+$$
 
-        ↓ Softmax 归一化
-        a₀₀  a₀₁  a₀₂    ← 概率化（每列和为1）
-        a₁₀  a₁₁  a₁₂
-        a₂₀  a₂₁  a₂₂
+**2. 计算相似度 (点积)**
 
-        ↓ 加权聚合 Value
-y₀ = a₀₀v₀ + a₁₀v₁ + a₂₀v₂  ← "我"的新表示（融入整句语境）
-y₁ = a₀₁v₀ + a₁₁v₁ + a₂₁v₂  ← "喜欢"的新表示
-y₂ = a₀₂v₀ + a₁₂v₁ + a₂₂v₂  ← "AI"的新表示
+$$
+E = \frac{Q K^T}{\sqrt{D}} = \begin{bmatrix} 
+e_{00} & e_{01} & e_{02} \\\\
+e_{10} & e_{11} & e_{12} \\\\
+e_{20} & e_{21} & e_{22} 
+\end{bmatrix}
+$$
 
-输出: [y₀, y₁, y₂]  (shape: N×Dᵥ)
+*(注：$e_{ij}$ 表示 $q_i$ 与 $k_j$ 的匹配度)*
+
+**3. Softmax 归一化**
+
+$$
+A = \text{softmax}(E) = \begin{bmatrix} 
+a_{00} & a_{01} & a_{02} \\\\
+a_{10} & a_{11} & a_{12} \\\\
+a_{20} & a_{21} & a_{22} 
+\end{bmatrix}
+$$
+
+*(注：每行的概率之和为 1)*
+
+**4. 加权聚合 Value**
+
+$$
+Y = A V = \begin{bmatrix} 
+a_{00}v_0 + a_{01}v_1 + a_{02}v_2 \\\\
+a_{10}v_0 + a_{11}v_1 + a_{12}v_2 \\\\
+a_{20}v_0 + a_{21}v_1 + a_{22}v_2 
+\end{bmatrix} = \begin{bmatrix} y_0 \\\\ y_1 \\\\ y_2 \end{bmatrix}
+$$
+
+输出 $Y$ 就是融入了整句语境后的新表示矩阵（形状: $N \times D_v$）。
 
 ---
 
@@ -202,7 +253,34 @@ y₂ = a₀₂v₀ + a₁₂v₁ + a₂₂v₂  ← "AI"的新表示
 
 这张图展示的是 Transformer 模型中 Encoder 层的核心运算单元。整个大模型就是由这样的模块堆叠几十层构建的：
 
-输入文本 → [自注意力 × N 层] → [前馈网络] → 输出预测
+```mermaid
+graph TD
+    subgraph Transformer Encoder 架构
+        direction TB
+        Input[输入文本 Input Text] --> Embed[词嵌入 & 位置编码<br/>Embedding & Positional Encoding]
+        
+        Embed --> AddNorm1
+        
+        subgraph Encoder Layer
+            direction TB
+            MultiHead[多头自注意力机制<br/>Multi-Head Attention] --> AddNorm1((Add & Norm))
+            AddNorm1 --> FFN[前馈神经网络<br/>Feed Forward Network]
+            FFN --> AddNorm2((Add & Norm))
+            
+            AddNorm1 -.->|残差连接| MultiHead
+            AddNorm2 -.->|残差连接| FFN
+        end
+        
+        AddNorm2 -->|堆叠 N 层| Output[预测输出 Output]
+    end
+
+    style Input fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+    style Output fill:#d5e8d4,stroke:#82b366,stroke-width:2px
+    style MultiHead fill:#ffe6cc,stroke:#d79b00
+    style FFN fill:#dae8fc,stroke:#6c8ebf
+    style AddNorm1 fill:#f5f5f5,stroke:#666666
+    style AddNorm2 fill:#f5f5f5,stroke:#666666
+```
 
 **最本质的洞察**：
 
