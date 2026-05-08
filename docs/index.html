@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小艾的 Agent 成长之路 — 从零开始的 AI 应用开发路线图</title>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/vue.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/dark.min.css">
+  <style>
+    :root {
+      --theme-color: #4A90D9;
+      --sidebar-width: 20rem;
+    }
+    .app-name-link {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .cover h1 {
+      font-size: 2.8rem;
+    }
+    .cover p {
+      font-size: 1.2rem;
+    }
+    .sidebar ul li a {
+      font-size: 0.95rem;
+    }
+    .markdown-section code {
+      font-size: 0.85rem;
+    }
+    .tip-badge {
+      display: inline-block;
+      background: var(--theme-color);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    window.$docsify = {
+      name: '🤖 小艾的 Agent 成长之路',
+      repo: '',
+      loadSidebar: true,
+      loadNavbar: false,
+      coverpage: true,
+      maxLevel: 3,
+      subMaxLevel: 3,
+      search: {
+        maxAge: 86400000,
+        paths: 'auto',
+        placeholder: '搜索文档...',
+        noData: '没有结果',
+        depth: 4
+      },
+      themeColor: '#4A90D9',
+      auto2top: true,
+      formatUpdated: '{YYYY}-{MM}-{DD}',
+      pagination: {
+        previousText: '上一节',
+        nextText: '下一节',
+        crossChapter: true
+      }
+    };
+  </script>
+  <script src="//cdn.jsdelivr.net/npm/docsify@5"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/search.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/zoom-image.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
+  <script>
+    // Auto dark mode based on system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.querySelector('link[rel="stylesheet"][href*="vue.min.css"]').disabled = true;
+    }
+  </script>
+</body>
+</html>
