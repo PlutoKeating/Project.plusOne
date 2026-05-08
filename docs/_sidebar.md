@@ -10,3 +10,4 @@
 - [📖 术语表 Glossary](glossary.md)
 - [⚡ 速查表 Cheatsheet](cheatsheet.md)
 - [🐛 故障排查 FAQ](troubleshooting.md)
+- [⚖️ 版权与责任控制](liability.md)

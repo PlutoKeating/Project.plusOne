@@ -47,24 +47,37 @@
         noData: '没有结果',
         depth: 4,
       },
-      pagination: {
-        previousText: '上一章节',
-        nextText: '下一章节',
-        crossChapter: true,
-        crossChapterText: true,
-      },
       copyCode: {
         buttonText: '复制',
         errorText: '错误',
         successText: '已复制'
       },
       formatUpdated: '{YYYY}-{MM}-{DD}',
+      plugins: [
+        function(hook, vm) {
+          hook.afterEach(function(html, next) {
+            var githubRepo = 'https://github.com/PlutoKeating/Project.plusOne';
+            var issuesUrl = githubRepo + '/issues';
+            var footer = [
+              '<hr/>',
+              '<div style="text-align: center; margin-top: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px;">',
+              '  <p style="margin-bottom: 1rem; font-weight: bold; color: #333;">如果发现内容有误，欢迎反馈：</p>',
+              '  <a href="' + githubRepo + '" target="_blank" style="display: inline-block; padding: 8px 16px; margin: 0 10px; background: #4A90D9; color: #fff; border-radius: 4px; text-decoration: none; font-weight: bold;">🐙 GitHub 源码</a>',
+              '  <a href="' + issuesUrl + '" target="_blank" style="display: inline-block; padding: 8px 16px; margin: 0 10px; background: #e05d44; color: #fff; border-radius: 4px; text-decoration: none; font-weight: bold;">🐛 提交 Issues 报错</a>',
+              '</div>',
+              '<div style="text-align: center; margin-top: 1rem; color: #666; font-size: 0.9em;">',
+              '  <p>PlutoKeating版权所有，使用AI生成 | <a href="#/liability" style="color: #4A90D9;">⚖️ 版权与责任控制声明</a></p>',
+              '</div>'
+            ].join('');
+            next(html + footer);
+          });
+        }
+      ]
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docsify-pagination@2/dist/docsify-pagination.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
 </body>
 </html>
