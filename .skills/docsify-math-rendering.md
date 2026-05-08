@@ -3,31 +3,46 @@
 ## Description
 This skill documents the necessary configurations, dependencies, and markdown writing best practices to successfully render complex LaTeX mathematical formulas (matrices, calculus, etc.) and Mermaid diagrams in a Docsify project. 
 
-## 1. HTML Configuration (index.html)
+## 1. HTML Configuration (index.html) Loading Order
 
-To properly render KaTeX and Mermaid, the `index.html` must include specific dependencies. Missing core dependencies is the #1 cause of unparsed or collapsed LaTeX syntax.
+**CRITICAL ISSUE**: When deploying to remote hosts like GitHub Pages, network latency can cause severe race conditions if script loading order is not carefully managed. 
+
+To properly render KaTeX and Mermaid, the `index.html` must include specific dependencies **in a strict order**. 
 
 ### KaTeX Dependencies
-`docsify-katex` relies on the core KaTeX engine and a specific markdown parser (`marked@4`) to avoid markdown escaping issues.
+`docsify-katex` overrides the built-in markdown compiler. Therefore, it **MUST be loaded BEFORE `docsify.js`**. If loaded after, Docsify will have already compiled the markdown on the first load using its default parser, breaking the LaTeX on GitHub Pages.
+
 ```html
-<!-- KaTeX Styles -->
+<!-- 1. KaTeX Styles & Engine -->
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css" />
-<!-- KaTeX Engine -->
 <script src="//cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
-<!-- CRITICAL: marked@4 is required for docsify-katex to parse multiline blocks correctly -->
+
+<!-- 2. marked@4 is required for docsify-katex to parse multiline blocks correctly -->
 <script src="//cdn.jsdelivr.net/npm/marked@4"></script>
-<!-- Docsify KaTeX Plugin -->
+
+<!-- 3. Docsify KaTeX Plugin (BEFORE docsify.js) -->
 <script src="//cdn.jsdelivr.net/npm/docsify-katex@latest/dist/docsify-katex.js"></script>
+
+<!-- 4. Core Docsify loaded LAST -->
+<script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
 ```
 
 ### Mermaid Dependencies
-For Mermaid to work with Docsify, initialize the ESM module and bind it to the window object before loading the docsify plugin.
+Starting from Mermaid v10, it is ESM only (`type="module"`), which forces asynchronous (deferred) loading. This introduces a fatal race condition on GitHub Pages where `docsify-mermaid` attempts to initialize diagrams before the `mermaid` object has finished downloading.
+
+**Solution**: Downgrade to **Mermaid v9.4.3**, which provides a classic synchronous UMD build. This guarantees Mermaid is available exactly when the plugin executes.
+
 ```html
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({ startOnLoad: true });
-  window.mermaid = mermaid;
+<!-- 1. Load Mermaid v9 synchronously -->
+<script src="//cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: false });
 </script>
+
+<!-- 2. Docsify Core -->
+<script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+
+<!-- 3. Load docsify-mermaid plugin AFTER Docsify -->
 <script src="//unpkg.com/docsify-mermaid@2.0.1/dist/docsify-mermaid.js"></script>
 ```
 
