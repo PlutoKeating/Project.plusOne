@@ -472,4 +472,6 @@ Creative Commons may be contacted at creativecommons.org.
 </details>
 
 ---
+**← 上一章：[故障排查 FAQ](/troubleshooting.md)**
+
 *最后更新日期：2026年5月*

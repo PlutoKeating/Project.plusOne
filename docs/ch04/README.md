@@ -420,4 +420,5 @@ def run_agent(query: str, max_steps: int = 5):
 
 ---
 
-**→ 下一步：[第 5 章：加一的工具箱与记忆库 — Tool, MCP, Memory](chapter05-tool-mcp-memory.md)**
+**← 上一章：[第 3 章：加一学会读书 — RAG 从零到 Demo](/ch03/)**  
+**→ 下一章：[第 5 章：加一的工具箱与记忆库 — Tool, MCP, Memory](/ch05/)**

@@ -292,3 +292,8 @@ messages.append({"role": "assistant", "content": reply})
 - [Stack Overflow - OpenAI Tag](https://stackoverflow.com/questions/tagged/openai-api)
 - [HuggingFace Forums](https://discuss.huggingface.co/)
 - [GitHub Issues - langchain](https://github.com/langchain-ai/langchain/issues)
+
+---
+
+**← 上一章：[速查表 Cheatsheet](/cheatsheet.md)**  
+**→ 下一章：[版权与责任控制](/liability.md)**

@@ -326,4 +326,5 @@ python hello_xiaoai.py
 
 ---
 
-**→ 下一步：[第 2 章：加一睁开双眼 — 第一次 LLM API 调用](chapter02-first-api-call.md)**
+**← 上一章：[序章：加一的诞生](/README.md)**  
+**→ 下一章：[第 2 章：加一睁开双眼 — 第一次 LLM API 调用](/ch02/)**

@@ -256,6 +256,9 @@ client = OpenAI(
 
 ---
 
+## 📖 附加阅读
+- [加一的聪明大脑是如何理解世界的？—— transformer开天辟地一般的self-attention架构](/ch02/extra-01-self-attention.md)
+
 ## 📚 本章参考资料
 
 - [OpenAI Chat Completions API 官方文档](https://platform.openai.com/docs/api-reference/chat/create)
@@ -267,4 +270,5 @@ client = OpenAI(
 
 ---
 
-**→ 下一步：[第 3 章：加一学会读书 — RAG 从零到 Demo](chapter03-rag-from-scratch.md)**
+**← 上一章：[第 1 章：打造加一的身体 — Python 快速起步](/ch01/)**  
+**→ 下一章：[第 3 章：加一学会读书 — RAG 从零到 Demo](/ch03/)**

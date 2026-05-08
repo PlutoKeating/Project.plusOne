@@ -109,3 +109,8 @@
 - [Prompt Engineering Guide](https://www.promptingguide.ai/) - source for many prompt engineering terms
 - [Python official glossary](https://docs.python.org/3/glossary.html)
 - [OpenAI developer docs](https://developers.openai.com/) - source for API terms
+
+---
+
+**← 上一章：[附录：AI 辅助学习指南 & Prompt 工程手册](/appendix-prompt-engineering.md)**  
+**→ 下一章：[速查表 Cheatsheet](/cheatsheet.md)**

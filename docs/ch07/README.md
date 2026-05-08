@@ -331,4 +331,5 @@ AI 应用开发
 
 ---
 
-**→ 附录：[AI 辅助学习指南 & Prompt 工程手册](appendix-prompt-engineering.md)**
+**← 上一章：[第 6 章：加一的团队 — Multi-Agent 何时用](/ch06/)**  
+**→ 下一章：[附录：AI 辅助学习指南 & Prompt 工程手册](/appendix-prompt-engineering.md)**

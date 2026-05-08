@@ -240,3 +240,7 @@ y₂ = a₀₂v₀ + a₁₂v₁ + a₂₂v₂  ← "AI"的新表示
 - [Transformer 论文逐段精读（中文视频）](https://www.bilibili.com/video/BV1pu411o7BE/)
 - [自注意力机制的直觉理解（博客）](https://lilianweng.github.io/posts/2018-06-24-attention/)
 - [多头注意力机制详解](https://d2l.ai/chapter_attention-mechanisms/multihead-attention.html)
+
+---
+
+**← 返回第 2 章：[加一睁开双眼 — 第一次 LLM API 调用](/ch02/)**

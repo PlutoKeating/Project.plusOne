@@ -271,3 +271,8 @@ if query:
 - [Streamlit docs](https://docs.streamlit.io/)
 - [FAISS GitHub](https://github.com/facebookresearch/faiss)
 - [ChromaDB docs](https://docs.trychroma.com/)
+
+---
+
+**← 上一章：[术语表 Glossary](/glossary.md)**  
+**→ 下一章：[故障排查 FAQ](/troubleshooting.md)**

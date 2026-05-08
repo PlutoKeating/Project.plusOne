@@ -343,4 +343,5 @@ streamlit run rag_demo.py
 
 ---
 
-**→ 下一步：[第 4 章：加一学会动手 — Agent 核心循环](chapter04-agent-loop.md)**
+**← 上一章：[第 2 章：加一睁开双眼 — 第一次 LLM API 调用](/ch02/)**  
+**→ 下一章：[第 4 章：加一学会动手 — Agent 核心循环](/ch04/)**

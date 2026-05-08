@@ -163,19 +163,29 @@ cp docs/chXX/extra-template.md docs/chXX/extra-NN-<slug>.md
 - 关联章节信息正确
 - 内容风格与主章节一致
 
-#### 步骤 3：更新 _sidebar.md
+#### 步骤 3：更新 _sidebar.md 与 所属章节的 README.md
 
-在对应章节下添加链接：
+在 _sidebar.md 对应章节下添加链接：
 
 ```markdown
 - [🧱 第1章：Python 快速起步](ch01/)
   - [附加阅读：虚拟环境详解](ch01/extra-01-virtual-env.md)
 ```
 
+在 所属章节的 README.md 中添加链接：
+
+```markdown
+## 📖 附加阅读
+- [虚拟环境详解](ch01/extra-01-virtual-env.md)
+
+## 📚 参考资料
+...（原有内容保持不变）
+```
+
 #### 步骤 4：Git 同步
 
 ```bash
-git add docs/chXX/extra-NN-<slug>.md docs/_sidebar.md
+git add docs/chXX/extra-NN-<slug>.md docs/_sidebar.md docs/chXX/README.md
 git commit -m "docs(chXX): add extra reading - <slug>"
 git push
 ```
