@@ -2,7 +2,7 @@
 
 ## 故事：加一的图书馆
 
-加一虽然能说话了，但项目负责人老张很快发现了一个严重的问题：
+加一虽然能说话了，但项目负责人 PlutoKeating 很快发现了一个严重的问题：
 
 **加一会"编造答案"。**
 
@@ -11,7 +11,7 @@
 
 这在 AI 领域被称为 **幻觉（Hallucination）** 。模型本质上是一个"高级文字接龙机器"，它没有实时数据，不知道你私有的知识，遇到不知道的事情，它会"自信地胡说"。
 
-老张的解决方案是：**给加一建一个图书馆。**
+PlutoKeating 的解决方案是：**给加一建一个图书馆。**
 
 这个图书馆，就是 **RAG（Retrieval-Augmented Generation，检索增强生成）**。
 
@@ -77,11 +77,11 @@ pip install openai faiss-cpu sentence-transformers python-dotenv
 创建一个 `knowledge_base.txt`：
 
 ```
-深智科技成立于 2020 年，总部位于北京，是一家专注于 AI 助手开发的公司。
-公司的核心产品是"加一"智能助手，支持对话、检索和工具调用。
-2024 年公司营收为 5000 万元，同比增长 120%。
-团队目前有 80 人，其中研发占 60%。
-公司的使命是"让每个企业都拥有自己的 AI 助手"。
+PlutoKeating 是本项目的创始人，2018 年开始打造"加一"智能助手。
+加一（plusOne）是项目打造的全方位智能助手，支持对话、检索和工具调用。
+项目始于 2018 年，历经多年迭代，已具备完整的功能。
+团队从 1 人起步，逐步发展为专注于 AI 助手开发的团队。
+项目的使命是"让每个人都能拥有自己的 AI 助手"。
 ```
 
 ### 第 2 步：文档切块
@@ -172,7 +172,7 @@ def generate_answer(query: str, context_chunks: list[str]) -> str:
     return response.choices[0].message.content
 
 # 测试
-question = "深智科技 2024 年营收是多少？"
+question = "加一智能助手是什么时候创建的？"
 retrieved = retrieve(question)
 answer = generate_answer(question, retrieved)
 
