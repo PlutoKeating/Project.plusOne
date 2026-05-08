@@ -26,6 +26,34 @@
         line-height: 1.5;
       }
     }
+    
+    /* 底部反馈按钮组件样式 */
+    .footer-feedback {
+      text-align: center; margin-top: 2rem; padding: 1.5rem; background-color: #f8f9fa; border-radius: 8px;
+    }
+    .footer-feedback p {
+      margin-bottom: 1.2rem; font-weight: bold; color: #333;
+    }
+    .feedback-btn-group {
+      display: flex; justify-content: center; gap: 20px;
+    }
+    .feedback-btn {
+      display: inline-block; padding: 10px 20px; color: #fff; border-radius: 6px; text-decoration: none !important; font-weight: bold; text-align: center; transition: opacity 0.2s;
+    }
+    .feedback-btn:hover {
+      opacity: 0.8; color: #fff !important;
+    }
+    .btn-github { background: #4A90D9; }
+    .btn-issues { background: #e05d44; }
+
+    @media screen and (max-width: 768px) {
+      .feedback-btn-group {
+        flex-direction: column; gap: 12px;
+      }
+      .feedback-btn {
+        width: 100%; box-sizing: border-box;
+      }
+    }
   </style>
 </head>
 <body>
@@ -60,10 +88,12 @@
             var issuesUrl = githubRepo + '/issues';
             var footer = [
               '<hr/>',
-              '<div style="text-align: center; margin-top: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px;">',
-              '  <p style="margin-bottom: 1rem; font-weight: bold; color: #333;">如果发现内容有误，欢迎反馈：</p>',
-              '  <a href="' + githubRepo + '" target="_blank" style="display: inline-block; padding: 8px 16px; margin: 0 10px; background: #4A90D9; color: #fff; border-radius: 4px; text-decoration: none; font-weight: bold;">🐙 GitHub 源码</a>',
-              '  <a href="' + issuesUrl + '" target="_blank" style="display: inline-block; padding: 8px 16px; margin: 0 10px; background: #e05d44; color: #fff; border-radius: 4px; text-decoration: none; font-weight: bold;">🐛 提交 Issues 报错</a>',
+              '<div class="footer-feedback">',
+              '  <p>如果发现内容有误，欢迎反馈：</p>',
+              '  <div class="feedback-btn-group">',
+              '    <a href="' + githubRepo + '" target="_blank" class="feedback-btn btn-github">🐙 GitHub 源码</a>',
+              '    <a href="' + issuesUrl + '" target="_blank" class="feedback-btn btn-issues">🐛 提交 Issues 报错</a>',
+              '  </div>',
               '</div>',
               '<div style="text-align: center; margin-top: 1rem; color: #666; font-size: 0.9em;">',
               '  <p>PlutoKeating版权所有，使用AI生成 | <a href="#/liability" style="color: #4A90D9;">⚖️ 版权与责任控制声明</a></p>',
