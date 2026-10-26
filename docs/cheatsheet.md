@@ -1,267 +1,119 @@
 # ⚡ 速查表 Cheatsheet
 
-> 开发过程中最常用的命令、代码片段和参数速查。
+开发时忘了某个流程或该选哪个方案，来这里扫一眼。代码细节回到对应章节查。
 
 ---
 
-## Python 环境
+## 一次模型调用由什么组成
 
-```bash
-# 创建虚拟环境
-python -m venv venv
-
-# 激活
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-# 安装依赖
-pip install openai python-dotenv sentence-transformers faiss-cpu streamlit
-pip install chromadb  # 替代 FAISS
-
-# 从 requirements.txt 安装
-pip install -r requirements.txt
-
-# 生成 requirements.txt
-pip freeze > requirements.txt
+```text
+程序 ──请求──▶ 模型服务
+        ├─ model         用哪个模型
+        ├─ messages      对话列表（system / user / assistant 三种角色）
+        ├─ temperature   随机程度
+        └─ max_tokens    回答长度上限
+程序 ◀──回答── 模型服务
 ```
+
+| 参数 | 作用 | 常用取值 |
+|------|------|---------|
+| model | 选模型 | 便宜快速的小模型做日常，复杂推理换大模型 |
+| temperature | 回答稳定还是发散 | 抽取、分类用 0–0.3；写作、头脑风暴用 0.7–1 |
+| max_tokens | 回答最长多少 Token | 按需要设，防止超长回答浪费费用 |
+| top_p | 另一种控制随机的方式 | 与 temperature 调一个就够 |
+
+配置放在 `.env` 文件里：API Key、服务地址、模型名。代码只读取，不写死。
 
 ---
 
-## LLM API 调用
+## RAG 流程
 
-### 基础调用
-
-```python
-from openai import OpenAI
-client = OpenAI(api_key="sk-xxx")
-
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system", "content": "你是一个助手"},
-        {"role": "user", "content": "你好"},
-    ],
-    temperature=0.7,
-    max_tokens=1024,
-)
-print(response.choices[0].message.content)
+```text
+准备阶段：文档 → 切块 → 向量化 → 存入向量库
+提问阶段：问题 → 向量化 → 相似度检索 Top-K 段落 → 拼进提示词 → 模型回答
 ```
 
-### 关键参数速查
-
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `model` | str | — | 模型名称，如 `gpt-4o-mini`、`gpt-4` |
-| `temperature` | float | 1.0 | 0-2，越低越确定，越高越有创意 |
-| `max_tokens` | int | 4096 | 限制输出最大长度 |
-| `top_p` | float | 1.0 | 核采样，与 temperature 二选一 |
-| `frequency_penalty` | float | 0 | -2到2，抑制重复内容 |
-| `presence_penalty` | float | 0 | -2到2，鼓励谈论新话题 |
-
-### .env 文件模板
-
-```env
-OPENAI_API_KEY=sk-your-key-here
-OPENAI_BASE_URL=https://api.openai.com/v1
-MODEL_NAME=gpt-4o-mini
-```
+| 环节 | 要决定什么 | 起步建议 |
+|------|-----------|---------|
+| 切块 | 每块多大、相邻块重叠多少 | 约 500 字符，重叠 50–100 |
+| 向量化 | 用哪个嵌入模型 | 中文内容选中文嵌入模型 |
+| 检索 | 取回几段（Top-K） | 3–5 段 |
+| 重排序 | 是否再精排一次 | 召回结果杂乱时再加 |
 
 ---
 
-## RAG 核心代码片段
+## Agent 循环（ReAct）
 
-### 文档切块
-
-```python
-def chunk_text(text: str, chunk_size: int = 200, overlap: int = 20) -> list[str]:
-    words = text.split()
-    chunks = []
-    start = 0
-    while start < len(words):
-        end = start + chunk_size
-        chunks.append(" ".join(words[start:end]))
-        start = end - overlap
-    return chunks
+```text
+用户问题
+   ↓
+模型思考 ──需要工具──▶ 程序执行工具 ──结果──▶ 放回对话 ──┐
+   │                                                      │
+   │◀─────────────────────────────────────────────────────┘
+   └──不需要工具──▶ 给出最终回答
+（设置最大步数，到了就停）
 ```
 
-### Embedding + FAISS 索引
+一个工具定义包含三样东西：
 
-```python
-from sentence_transformers import SentenceTransformer
-import faiss
-import numpy as np
+| 部分 | 说明 |
+|------|------|
+| 名称 | 模型调用时用的名字 |
+| 描述 | 写给模型看：这个工具做什么、什么情况下用 |
+| 参数 | 每个参数的名字、类型、含义，以及哪些必填 |
 
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
-vectors = embedder.encode(chunks)
-index = faiss.IndexFlatL2(vectors.shape[1])
-index.add(np.array(vectors).astype("float32"))
-
-# 检索
-query_vec = embedder.encode([query])
-distances, indices = index.search(np.array(query_vec).astype("float32"), top_k=3)
-results = [chunks[i] for i in indices[0]]
-```
+工具执行出错时，把错误信息作为结果返回给模型，程序不要直接崩溃。
 
 ---
 
-## Agent 工具定义规范
+## 记忆
 
-### OpenAI 标准格式
-
-```python
-tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "tool_name",
-            "description": "工具描述（给 LLM 看的，越清晰越好）",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "param1": {
-                        "type": "string",
-                        "description": "参数描述",
-                    }
-                },
-                "required": ["param1"],
-            },
-        },
-    }
-]
-```
-
-### 工具实现的规范模板
-
-```python
-def my_tool(param1: str, param2: int = 0) -> str:
-    """
-    一句话描述工具功能。
-    
-    Args:
-        param1: 参数描述
-        param2: 参数描述，默认值
-    Returns:
-        返回描述
-    """
-    try:
-        result = do_something(param1, param2)
-        return str(result)
-    except Exception as e:
-        return f"工具执行出错: {e}"
-```
-
----
-
-## 记忆系统代码片段
-
-### 短期记忆（滑动窗口）
-
-```python
-from collections import deque
-
-class ShortTermMemory:
-    def __init__(self, max_rounds: int = 10):
-        self.messages = deque(maxlen=max_rounds * 2)
-    
-    def add(self, role: str, content: str):
-        self.messages.append({"role": role, "content": content})
-    
-    def get_context(self, system_prompt: str = "") -> list[dict]:
-        ctx = []
-        if system_prompt:
-            ctx.append({"role": "system", "content": system_prompt})
-        ctx.extend(self.messages)
-        return ctx
-```
-
-### 长期记忆（摘要 + 检索）
-
-```python
-class LongTermMemory:
-    def __init__(self):
-        self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
-        self.memories = []
-    
-    def store(self, summary: str):
-        vec = self.embedder.encode([summary])[0]
-        self.memories.append((summary, vec))
-    
-    def recall(self, query: str, top_k: int = 2) -> list[str]:
-        q_vec = self.embedder.encode([query])[0]
-        scored = [(sum(a*b for a,b in zip(q_vec, emb)), txt)
-                  for txt, emb in self.memories]
-        scored.sort(reverse=True)
-        return [s for _, s in scored[:top_k]]
-```
-
----
-
-## ReAct Agent 循环骨架
-
-```python
-def run_agent(query: str, max_steps: int = 5) -> str:
-    messages = [{"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": query}]
-    
-    for step in range(max_steps):
-        response = client.chat.completions.create(
-            model="gpt-4o-mini", messages=messages)
-        reply = response.choices[0].message.content
-        
-        # LLM 决定使用工具
-        if need_tool(reply):
-            tool_name, params = parse_tool_call(reply)
-            result = execute_tool(tool_name, params)
-            messages.append({"role": "assistant", "content": reply})
-            messages.append({"role": "user", "content": f"工具返回: {result}"})
-        else:
-            return reply  # 直接回答
-    
-    return "达到最大步骤限制"
-```
-
----
-
-## Streamlit 快速启动
-
-```python
-import streamlit as st
-
-st.set_page_config(page_title="加一助手", layout="wide")
-st.title("🤖 加一助手")
-
-# 侧边栏
-with st.sidebar:
-    st.header("配置")
-    api_key = st.text_input("API Key", type="password")
-    model = st.selectbox("模型", ["gpt-4o-mini", "gpt-4"])
-
-# 主区域
-query = st.text_input("输入你的问题：")
-if query:
-    with st.spinner("加一正在思考..."):
-        # 你的逻辑
-        st.success("回答内容")
-```
-
----
-
-## 常见错误代码速查
-
-| 错误 | 原因 | 解决 |
+| 类型 | 做法 | 适合 |
 |------|------|------|
-| `AuthenticationError` | API Key 错误或未设置 | 检查 `.env` 文件 |
-| `RateLimitError` | 请求频率超限 | 降低请求频率，或升级账号 |
-| `TimeoutError` | 请求超时 | 增加 timeout 参数 |
-| `BadRequestError` | 参数错误 | 检查 model 名、messages 格式 |
-| `APIConnectionError` | 网络无法连接 | 检查网络和 BASE_URL |
-| `faiss` 安装失败 | Windows 编译问题 | 用 `pip install faiss-cpu --no-build-isolation` 或用 ChromaDB |
+| 短期记忆 | 只保留最近 N 轮对话 | 普通多轮聊天 |
+| 长期记忆 | 历史对话压缩成摘要存入向量库，用时检索 | 需要记住几天前的事 |
+
+```text
+每轮对话：用户消息加入历史 → 历史 + 系统提示词发给模型 → 回答加入历史
+历史太长：丢掉最早的几轮，或把它们总结成一段摘要
+```
 
 ---
 
-> **💡 提示：** 将此页面保存为浏览器书签，开发时随时查阅。
+## 多 Agent 模式
+
+| 模式 | 结构 | 适合 |
+|------|------|------|
+| 流水线 | A → B → C 依次接力 | 步骤固定的任务，如"搜集 → 写稿 → 审校" |
+| 协调者 + 工作者 | 协调者拆任务派给多个工作者，再汇总 | 子任务可以并行 |
+| 对话协作 | 多个 Agent 轮流发言讨论 | 需要互相检查、辩论 |
+
+---
+
+## 选型速查
+
+| 要做的事 | 可选方案 | 怎么选 |
+|---------|---------|--------|
+| 向量库 | FAISS / ChromaDB / Pinecone | 本地练习用 FAISS 或 ChromaDB；FAISS 装不上就用 ChromaDB；要托管服务选 Pinecone |
+| RAG 框架 | 手写 / LlamaIndex / LangChain | 学原理先手写；要快速搭建用 LlamaIndex |
+| Agent 框架 | 手写 / LangChain / LangGraph | 单 Agent 手写即可；流程有分支和循环用 LangGraph |
+| 多 Agent 框架 | CrewAI / AutoGen / LangGraph | 按角色分工用 CrewAI；Agent 间对话协作用 AutoGen |
+| 界面 | Streamlit | 几十行 Python 出网页，适合演示 |
+| 模型 | 云端 API / 开源模型 | 先用云端 API 跑通；有隐私或成本要求再考虑本地部署开源模型 |
+
+---
+
+## 常见错误速查
+
+| 错误名 | 意思 | 先查什么 |
+|------|------|------|
+| AuthenticationError | 身份验证失败 | `.env` 里的 API Key |
+| RateLimitError | 请求太频繁或额度用完 | 账户余额、调用频率 |
+| TimeoutError | 等太久没回应 | 网络、超时设置 |
+| BadRequestError | 请求格式不对 | 模型名、messages 结构 |
+| APIConnectionError | 连不上服务 | 网络、服务地址 |
+
+更多问题见 [故障排查 FAQ](/troubleshooting.md)。
 
 ---
 

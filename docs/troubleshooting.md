@@ -1,285 +1,76 @@
 # 🐛 常见问题排查指南 Troubleshooting & FAQ
 
-> 本页面收集了从零开始学 Agent 开发时最常见的 20 个问题。遇到报错时，先来这里查。
+遇到报错先在下表里找现象，按"处理"一栏动手。
 
 ---
 
 ## 环境搭建
 
-### Q1：Python 安装后命令行找不到 python 命令？
-
-```
-Windows: 安装时勾选 "Add Python to PATH"，或手动添加到系统环境变量
-Mac:    使用 brew install python
-Linux:  使用系统包管理器或 pyenv
-
-验证：python --version
-```
-
-### Q2：pip install 报 SSL 证书错误？
-
-```bash
-# 临时方案
-pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org 包名
-
-# 长期方案：升级 pip
-python -m pip install --upgrade pip
-```
-
-### Q3：虚拟环境无法激活？
-
-```bash
-# Windows PowerShell 执行策略问题
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-
-# 确认你在正确的目录
-# 应该能看到 venv/Scripts/activate (Windows) 或 venv/bin/activate (macOS/Linux)
-```
-
----
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| 命令行提示找不到 `python` | 安装时没把 Python 加入系统路径 | 重新安装并勾选 "Add Python to PATH"（Mac 可用 Homebrew 安装），再用 `python --version` 确认。 |
+| `pip install` 报 SSL 证书错误 | pip 版本旧或网络拦截了证书校验 | 先升级 pip；仍失败就在安装时把 pypi 相关域名设为信任主机。 |
+| 虚拟环境激活不了 | Windows PowerShell 默认禁止运行脚本，或不在项目目录 | 把当前用户的 PowerShell 执行策略改为 RemoteSigned，并回到含 `venv` 文件夹的目录再激活。 |
 
 ## API 调用
 
-### Q4：AuthenticationError：Incorrect API key provided
-
-```
-1. 检查 .env 文件中的 KEY 是否完整复制（没有多余空格）
-2. 检查 load_dotenv() 是否在创建 client 之前调用
-3. 检查 .env 文件是否在项目根目录
-4. 如果 KEY 以 sk-proj- 开头，确认用的是正确的 project key
-```
-
-### Q5：RateLimitError：You exceeded your current quota
-
-```
-1. 检查 OpenAI 账户余额：platform.openai.com/usage
-2. 新账户通常有免费额度，用完需要充值
-3. 降低请求频率：在调用之间加 time.sleep(1)
-4. 考虑使用更便宜的模型（gpt-4o-mini 替代 gpt-4o）
-```
-
-### Q6：API 返回超时 Timeout
-
-```
-可能原因：
-- 网络问题（国内访问 OpenAI 可能需要代理）
-- 模型响应慢
-
-解决方案：
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_BASE_URL"),  # 如果使用代理或第三方
-    timeout=60.0,  # 增加到 60 秒
-    max_retries=3,
-)
-```
-
-### Q7：httpx.HTTPStatusError：404
-
-```
-可能原因：
-- base_url 设置错误
-- 模型名拼写错误（如 gpt-4o-mini 写成了 gpt-4-mini）
-
-检查你的 OPENAI_BASE_URL 和 model 参数是否正确。
-```
-
----
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| AuthenticationError（API Key 不正确） | Key 复制不完整、`.env` 没读到或位置不对 | 核对 Key 没有多余空格，确认 `.env` 在项目根目录且先加载 `.env` 再创建客户端。 |
+| RateLimitError（超出额度） | 账户余额用完或请求太密 | 到服务商后台查余额并充值，调用之间加间隔，或换更便宜的模型。 |
+| 请求超时 | 网络访问不稳定或模型响应慢 | 把超时时间调长并开启自动重试，国内网络可改用代理或第三方服务地址。 |
+| 返回 404 | 服务地址写错或模型名拼错 | 逐字核对 `.env` 里的服务地址和代码里的模型名。 |
 
 ## RAG / 向量库
 
-### Q8：faiss-cpu 安装失败（Windows）
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| Windows 上 `faiss-cpu` 装不上 | 缺少编译环境 | 改用 conda 安装，或直接换成 ChromaDB。 |
+| 嵌入模型下载失败 | 国内访问 HuggingFace 受限 | 设置 HuggingFace 镜像地址，或手动下载模型放到本地目录后按路径加载。 |
+| 检索结果不相关 | 切块大小不合适、嵌入模型不适合中文、Top-K 太小 | 打印检索出的段落逐一检查，再依次调整切块大小、换中文嵌入模型、加大 Top-K 对比效果。 |
+| 索引为空，什么都搜不到 | 检索前漏了"存入"这一步 | 确认流程是"向量化 → 存入 → 检索"，并打印索引里的条目数。 |
 
-```
-方案 1：使用 conda
-conda install -c conda-forge faiss-cpu
+## Agent / 工具调用
 
-方案 2：换 ChromaDB（推荐）
-pip install chromadb
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| 模型不调用工具，直接回答 | 工具描述太含糊、系统提示词没说可以用工具，或模型认为自己知道答案 | 在工具描述里写清使用场景，并在系统提示词里说明哪些问题必须调用工具。 |
+| 工具参数解析失败 | 模型输出的参数不是合法 JSON | 解析时捕获错误，把出错内容返回给模型让它重新生成。 |
+| Agent 一直循环停不下来 | 没设最大步数，或工具返回内容模型看不懂 | 设置 5–10 步上限，并把工具结果写成清楚的自然语言；同一工具连续多次返回相同结果就主动停止。 |
 
-方案 3：使用纯 Python 方案
-pip install numpy  # 用 numpy 实现简单的相似度搜索
-```
+## Streamlit 界面
 
-### Q9：sentence-transformers 下载模型失败
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| 改了代码页面不变 | 页面没有重新运行或命中了缓存 | 点右上角 Rerun，仍不变就清缓存或重启 Streamlit。 |
+| 报 ModuleNotFoundError | Streamlit 没装在当前虚拟环境 | 激活项目的虚拟环境后安装依赖，再从项目目录启动。 |
 
-```
-可能原因：国内无法访问 HuggingFace
+## 记忆 / 上下文
 
-解决方案：
-1. 设置镜像：
-   export HF_ENDPOINT=https://hf-mirror.com
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| 对话久了报 Token 超限 | 对话历史越积越长，超过上下文窗口 | 只保留最近 N 轮，或把早期对话压缩成摘要。 |
+| 加一忘了前面说过的话 | 每次调用都新建了消息列表，或窗口设得太小 | 全程复用同一个对话历史，每轮把用户消息和模型回答都追加进去。 |
 
-2. 或者手动下载模型到本地：
-   从 https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2 下载
-   放到 ./models/ 目录下
-   加载时指定路径：SentenceTransformer("./models/all-MiniLM-L6-v2")
-```
+## 其他
 
-### Q10：RAG 检索结果不相关
-
-```
-排查顺序：
-1. 检查切块大小：chunk_size 是否太大？建议从 500 字符开始调
-2. 检查重叠：chunk_overlap 太小可能切断语义，建议 50-100
-3. 检查 Embedding 模型：中文内容用 m3e-base 或 text2vec 比英文模型好很多
-4. 检查用户问题是否被正确向量化
-5. 把 top_k 从 2 调到 10 看是没召回到还是排序问题
-6. 打印检索到的文档块内容，人工判断相关性
-```
-
-### Q11：ChromaDB 或 FAISS 索引为空
-
-```python
-# 常见错误：忘记在检索前执行 add
-# 确保你的流程是：embed → add → search
-print(f"索引中的向量数: {index.ntotal}")  # FAISS
-print(f"集合中的文档数: {collection.count()}")  # ChromaDB
-```
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| `.env` 不生效 | 文件位置不对、被存成了 `.env.txt`，或读取前没加载 | 检查文件名和位置，确保先加载 `.env` 再读取变量，并打印变量值确认。 |
+| 代码在别人电脑上跑不起来 | 缺依赖清单、缺 `.env` 说明、写死了本地路径 | 交付前补齐 `requirements.txt`、`.env.example` 和 README 安装说明，并去掉绝对路径。 |
 
 ---
 
-## Agent / Tool Calling
+## 通用排查顺序
 
-### Q12：LLM 不调用工具，直接回答
-
+```text
+1. 读完整报错信息，复制给 AI 或搜索引擎
+2. 回看最近改了什么（git diff）
+3. 确认 Python 版本和已装依赖
+4. 单独测试 API 能否连通
+5. 打印中间变量，看数据在哪一步出错
+6. 写一个最小复现，缩小范围
 ```
-可能原因：
-1. 工具描述不够清晰：LLM 不知道什么时候该用
-2. tool_choice 设置问题：设为 "auto" 而非 "required"
-3. System Prompt 中没有告知可以使用工具
-4. LLM 判断不需要工具：如果它认为自己知道答案，就不会调用
-
-解决方案：
-- 在 System Prompt 中明确："当用户问了需要实时数据的问题时，你必须调用工具"
-- 将 tool_choice 设为 "required" 强制调用（测试用）
-- 工具的 description 要写明什么场景下用
-```
-
-### Q13：tool_calls 解析错误
-
-```python
-# 安全解析工具调用
-if response.choices[0].message.tool_calls:
-    for tool_call in response.choices[0].message.tool_calls:
-        try:
-            args = json.loads(tool_call.function.arguments)
-        except json.JSONDecodeError:
-            print(f"JSON 解析失败: {tool_call.function.arguments}")
-            continue
-```
-
-### Q14：Agent 死循环
-
-```
-可能原因：
-- 工具调用返回结果后 LLM 反复调用同一个工具
-- max_steps 没有设置，或设置过大
-- 工具返回格式不对，LLM 无法理解
-
-解决方案：
-- 始终设置 max_steps（建议 5-10）
-- 检测重复：如果连续 3 次调用同一工具且结果一样，主动停止
-- 工具返回要清晰明了，用自然语言描述结果
-```
-
----
-
-## Streamlit / 前端
-
-### Q15：Streamlit 页面不更新
-
-```
-解决方案：
-- 页面右上角点 "Rerun"
-- 在代码修改后保存，Streamlit 会自动检测并提示 rerun
-- 清除缓存：st.cache_resource.clear() 或重启 Streamlit
-```
-
-### Q16：Streamlit 报 ModuleNotFoundError
-
-```
-确认：
-- streamlit 是否安装在当前虚拟环境中
-- 虚拟环境是否已激活
-- 在正确目录运行：streamlit run 文件名.py
-```
-
----
-
-## Memory / 上下文
-
-### Q17：对话历史导致 token 超限
-
-```
-解决方案：
-- 设置 max_rounds 滑动窗口，只保留最近 N 轮
-- 估算 token 用量：粗略 1 个中文字 ≈ 1.5 tokens
-- 当 messages 接近上下文窗口时，对早期对话做总结压缩
-- 使用 tiktoken 库精确计算 token 数
-```
-
-### Q18：加一忘了前面说过的话
-
-```
-可能原因：
-1. 没有维护 messages 列表
-2. 每次调用创建了新的 messages（丢失了历史）
-3. 滑动窗口太小，把有用的信息也清掉了
-
-确保：
-messages.append({"role": "user", "content": user_input})
-# ... LLM 调用
-messages.append({"role": "assistant", "content": reply})
-# 下一次调用时继续用同一个 messages
-```
-
----
-
-## 其他常见问题
-
-### Q19：.env 文件不生效
-
-```
-- 确认 .env 文件在项目根目录（和你的 .py 文件在同一目录或上级目录）
-- 确认没有命名为 .env.txt
-- 调用顺序：先 load_dotenv()，再 os.getenv()
-- 调试：print(os.getenv("OPENAI_API_KEY")) 看是否读取到
-```
-
-### Q20：代码在别人电脑上跑不通
-
-```
-最常见的遗漏：
-- 没有提供 requirements.txt
-- 没有说明需要 .env 文件
-- 没有说明 Python 版本要求
-- 硬编码了本地路径
-
-项目交付 check list：
-- [ ] requirements.txt 包含所有依赖
-- [ ] README.md 有 setup 说明
-- [ ] .env.example 提供环境变量模板
-- [ ] 不用绝对路径
-```
-
----
-
-## 快速诊断流程
-
-遇到问题时，按这个顺序排查：
-
-```
-1. 错误信息是什么？ → 复制到 Google / AI 搜索
-2. 最近改了什么？ → Git diff 看变更
-3. 环境对吗？ → python --version, pip list
-4. 依赖版本对吗？ → 检查 requirements.txt
-5. API 能通吗？ → 用 curl 或 Postman 测试
-6. 打印中间变量 → 加 print() 看数据流
-7. 缩小范围 → 写一个最小复现代码
-```
-
-> **最后的建议：** 80% 的问题都可以通过"把错误信息复制给 AI"来解决。学会提问，你就已经解决了一半的问题。
 
 ---
 
