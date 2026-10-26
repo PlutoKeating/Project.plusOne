@@ -24,6 +24,8 @@ Agent 的核心在于这个循环，用哪个框架都可以。
 
 ## 循环架构
 
+<div data-anim="ch04-react-loop"></div>
+
 ```mermaid
 flowchart TD
     A[用户提问] --> B[LLM 思考：下一步做什么？]

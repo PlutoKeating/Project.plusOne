@@ -45,6 +45,12 @@
       opacity: 0.8; color: #fff !important;
     }
     .btn-github { background: #4A90D9; }
+
+    /* 原理动画（animations/ 打包出的 Remotion Player） */
+    .markdown-section [data-anim] {
+      margin: 1.2rem 0; aspect-ratio: 16 / 9; border-radius: 12px; background: #F7F9FC;
+      box-shadow: 0 4px 16px rgba(44, 62, 80, 0.08);
+    }
     .btn-issues { background: #e05d44; }
 
     @media screen and (max-width: 768px) {
@@ -86,6 +92,12 @@
       },
       formatUpdated: '{YYYY}-{MM}-{DD}',
       plugins: [
+        function(hook) {
+          // 每次页面渲染完，把 <div data-anim="id"></div> 挂载成动画播放器
+          hook.doneEach(function() {
+            if (window.PlusOneAnim) window.PlusOneAnim.mountAll();
+          });
+        },
         function(hook, vm) {
           hook.afterEach(function(html, next) {
             var githubRepo = 'https://github.com/PlutoKeating/Project.plusOne';
@@ -130,5 +142,8 @@
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
   <script src="//unpkg.com/docsify-mermaid@2.0.1/dist/docsify-mermaid.js"></script>
+
+  <!-- 5. 原理动画：源码在 animations/，用 npm run build:web 生成 -->
+  <script src="assets/anim/plusone-anim.js"></script>
 </body>
 </html>
