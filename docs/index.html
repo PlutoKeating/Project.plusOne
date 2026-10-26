@@ -64,8 +64,11 @@
       name: '🤖 加一的 Agent 成长之路',
       repo: 'https://github.com/PlutoKeating/Project.plusOne',
       loadSidebar: true,
-      loadNavbar: true,
-      mergeNavbar: true, // 移动端合并导航栏
+      // 托管平台对不存在的文件会回退返回 index.html（HTTP 200），
+      // 所以子目录的 _sidebar.md 一律指向根目录，并且不加载不存在的 _navbar.md
+      alias: {
+        '/.*/_sidebar.md': '/_sidebar.md'
+      },
       coverpage: true,
       maxLevel: 3,
       subMaxLevel: 3,
@@ -112,8 +115,8 @@
   <script src="//cdn.jsdelivr.net/npm/marked@4"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-katex@latest/dist/docsify-katex.js"></script>
 
-  <!-- 2. Mermaid v9 is used instead of v10+ to allow synchronous loading and avoid ESM race conditions on GitHub Pages -->
-  <script src="//cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.min.js"></script>
+  <!-- 2. Mermaid v10 classic build (synchronous). docsify-mermaid@2 calls mermaid.run(), which v9 does not have -->
+  <script src="//cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
   <script>
     mermaid.initialize({ startOnLoad: false });
   </script>

@@ -28,13 +28,13 @@ To properly render KaTeX and Mermaid, the `index.html` must include specific dep
 ```
 
 ### Mermaid Dependencies
-Starting from Mermaid v10, it is ESM only (`type="module"`), which forces asynchronous (deferred) loading. This introduces a fatal race condition on GitHub Pages where `docsify-mermaid` attempts to initialize diagrams before the `mermaid` object has finished downloading.
+`docsify-mermaid@2` calls `mermaid.run()`, which only exists in Mermaid v10+. Mermaid v9 throws `mermaid.run is not a function` and diagrams do not render.
 
-**Solution**: Downgrade to **Mermaid v9.4.3**, which provides a classic synchronous UMD build. This guarantees Mermaid is available exactly when the plugin executes.
+Mermaid v10 still ships a classic (non-ESM) build at `dist/mermaid.min.js`. Load it synchronously with a pinned version so it is ready before the plugin runs:
 
 ```html
-<!-- 1. Load Mermaid v9 synchronously -->
-<script src="//cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.min.js"></script>
+<!-- 1. Load Mermaid v10 classic build synchronously -->
+<script src="//cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
 <script>
   mermaid.initialize({ startOnLoad: false });
 </script>
@@ -44,6 +44,15 @@ Starting from Mermaid v10, it is ESM only (`type="module"`), which forces asynch
 
 <!-- 3. Load docsify-mermaid plugin AFTER Docsify -->
 <script src="//unpkg.com/docsify-mermaid@2.0.1/dist/docsify-mermaid.js"></script>
+```
+
+### Hosting Fallback (Sidebar / Navbar)
+The site host returns `index.html` with HTTP 200 for any missing file. Docsify treats that as valid content, so a missing `ch01/_sidebar.md` or `_navbar.md` gets the whole `index.html` (including `<div id="app">加载中...</div>`) rendered into the page. Keep these settings in `index.html`:
+
+```js
+loadSidebar: true,
+alias: { '/.*/_sidebar.md': '/_sidebar.md' }, // all pages use the root sidebar
+// no loadNavbar: the project has no _navbar.md
 ```
 
 ## 2. Markdown Writing Rules
@@ -87,3 +96,7 @@ Use standard markdown code blocks tagged with `mermaid`:
   1. Missing `marked@4` dependency in `index.html`, causing Docsify to use its default Markdown parser which strips the LaTeX newlines.
   2. The markdown file uses `\\` instead of `\\\\` for LaTeX newlines.
 - **Solution**: Check `index.html` for `<script src="//cdn.jsdelivr.net/npm/marked@4"></script>` and globally replace `\\` with `\\\\` inside `$$...$$` math blocks.
+
+- **Symptom**: Sidebar or page body shows "加载中..." forever, or a second copy of the site inside the page.
+- **Cause**: Docsify fetched a missing `_sidebar.md` / `_navbar.md` and the host answered with `index.html`.
+- **Solution**: Keep the `alias` rule above and do not enable `loadNavbar` without a real `_navbar.md`.
