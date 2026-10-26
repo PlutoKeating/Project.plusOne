@@ -1,0 +1,324 @@
+/* 页面视觉组件：代码卡片、提示卡、故事卡、表格卡片、标题色条。
+   对应的 DOM 包装由 assets/site.js 在每次页面渲染后完成。 */
+
+:root {
+  --c-blue: #4A90D9;
+  --c-green: #3DB37A;
+  --c-orange: #F5A623;
+  --c-purple: #8E6CD8;
+  --c-red: #E05D44;
+  --c-ink: #2C3E50;
+  --c-muted: #7A8A9A;
+  --c-line: #E1E8F0;
+}
+
+/* ---------- 标题 ---------- */
+.markdown-section h2 {
+  position: relative;
+  padding: 0.35em 0 0.35em 0.9em;
+  margin-top: 2.6rem;
+  border-left: 6px solid var(--c-blue);
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(74, 144, 217, 0.10), rgba(74, 144, 217, 0) 70%);
+}
+.markdown-section h3 {
+  position: relative;
+  padding-left: 1.1em;
+}
+.markdown-section h3::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--c-orange);
+  box-shadow: 0 0 0 4px rgba(245, 166, 35, 0.18);
+}
+
+/* ---------- 代码卡片 ---------- */
+.code-card {
+  --accent: var(--c-blue);
+  margin: 1.4rem 0;
+  border-radius: 16px;
+  border: 1px solid var(--c-line);
+  border-top: 5px solid var(--accent);
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(44, 62, 80, 0.08);
+  overflow: hidden;
+}
+.code-card[data-kind="flow"] { --accent: var(--c-green); }
+.code-card[data-kind="prompt"] { --accent: var(--c-purple); }
+.code-card[data-kind="example"] { --accent: var(--c-orange); }
+.code-card[data-kind="data"] { --accent: var(--c-red); }
+.code-card[data-kind="formula"] { --accent: var(--c-orange); }
+.markdown-section .code-card[data-kind="formula"] pre > code {
+  font-size: 1.25em;
+  font-weight: 700;
+  text-align: center;
+  color: var(--c-ink);
+}
+.markdown-section .code-card[data-kind="formula"] pre,
+.markdown-section .code-card[data-kind="formula"] pre > code {
+  background: linear-gradient(135deg, #FFF8EC, #FFFFFF);
+}
+
+.code-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.55em 1em;
+  font-size: 0.85em;
+  font-weight: 700;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, #fff);
+  border-bottom: 1px dashed color-mix(in srgb, var(--accent) 35%, #fff);
+}
+.code-card-dot {
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: code-card-pulse 1.8s ease-in-out infinite;
+}
+.code-card-hint {
+  margin-left: auto;
+  font-weight: 400;
+  color: var(--c-muted);
+}
+@keyframes code-card-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent); }
+}
+
+.markdown-section .code-card pre {
+  margin: 0;
+  border-radius: 0;
+  background: linear-gradient(180deg, #FBFCFE, #F4F7FB);
+}
+.markdown-section .code-card pre::after { content: none; }
+.markdown-section .code-card pre > code {
+  font-size: 0.92em;
+  line-height: 1.85;
+}
+
+/* ---------- 提示卡（引用块） ---------- */
+.markdown-section blockquote.callout {
+  --accent: var(--c-blue);
+  position: relative;
+  margin: 1.4rem 0;
+  padding: 0.9em 1.2em 0.9em 3.6em;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, #fff);
+  border-left: 6px solid var(--accent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 7%, #fff);
+  color: var(--c-ink);
+  box-shadow: 0 6px 18px rgba(44, 62, 80, 0.06);
+}
+.markdown-section blockquote.callout::before {
+  content: attr(data-icon);
+  position: absolute;
+  left: 0.75em;
+  top: 0.7em;
+  width: 1.9em;
+  height: 1.9em;
+  line-height: 1.9em;
+  text-align: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent);
+  font-size: 1.05em;
+}
+.markdown-section blockquote.callout p { margin: 0.3em 0; }
+.markdown-section blockquote.callout strong:first-child { color: var(--accent); }
+.markdown-section blockquote.callout-plusone { --accent: var(--c-blue); }
+.markdown-section blockquote.callout-ask { --accent: var(--c-purple); }
+.markdown-section blockquote.callout-tip { --accent: var(--c-green); }
+.markdown-section blockquote.callout-warn { --accent: var(--c-orange); }
+
+/* "加一说"做成对话气泡 */
+.markdown-section blockquote.callout-plusone {
+  border-radius: 4px 18px 18px 18px;
+  background: linear-gradient(135deg, #EEF5FD, #F7FAFE);
+}
+
+/* ---------- 故事卡 ---------- */
+.story-card {
+  position: relative;
+  margin: 1rem 0 1.6rem;
+  padding: 1.1em 1.3em 1.1em 1.3em;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #FFF8EC, #FFFDF8);
+  border: 2px dashed rgba(245, 166, 35, 0.55);
+  box-shadow: 0 8px 22px rgba(245, 166, 35, 0.12);
+}
+.story-card::before {
+  content: "📖 加一的故事";
+  display: inline-block;
+  margin-bottom: 0.4em;
+  padding: 0.15em 0.8em;
+  border-radius: 999px;
+  background: var(--c-orange);
+  color: #fff;
+  font-size: 0.8em;
+  font-weight: 700;
+}
+.story-card p { margin: 0.4em 0; }
+
+/* ---------- 表格卡片 ---------- */
+.table-card {
+  margin: 1.2rem 0;
+  border-radius: 14px;
+  border: 1px solid var(--c-line);
+  box-shadow: 0 6px 18px rgba(44, 62, 80, 0.06);
+  overflow-x: auto;
+}
+.markdown-section .table-card table {
+  display: table;
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+.markdown-section .table-card th {
+  background: color-mix(in srgb, var(--c-blue) 12%, #fff);
+  color: var(--c-ink);
+  border: none;
+  border-bottom: 2px solid var(--c-blue);
+}
+.markdown-section .table-card td {
+  border: none;
+  border-bottom: 1px solid var(--c-line);
+}
+.markdown-section .table-card tr:nth-child(2n) { background: #F8FAFD; }
+.markdown-section .table-card tbody tr:hover { background: color-mix(in srgb, var(--c-blue) 6%, #fff); }
+
+/* ---------- 检查清单 ---------- */
+.markdown-section li.task-list-item {
+  list-style: none;
+  margin: 0.4em 0;
+  padding: 0.45em 0.8em;
+  border-radius: 10px;
+  background: #F4F9F6;
+  border-left: 4px solid var(--c-green);
+}
+.markdown-section li.task-list-item input { margin-right: 0.5em; }
+
+/* ---------- 概念卡片（```cards） ---------- */
+.concept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 1.4rem 0;
+}
+.concept-card {
+  --accent: var(--c-blue);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+  padding: 1em 1.1em 1.1em;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--c-line);
+  border-top: 5px solid var(--accent);
+  box-shadow: 0 8px 22px rgba(44, 62, 80, 0.07);
+  transition: translate 0.25s ease, box-shadow 0.25s ease;
+}
+.concept-card:hover { translate: 0 -3px; box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 22%, transparent); }
+.concept-card[data-color="green"] { --accent: var(--c-green); }
+.concept-card[data-color="orange"] { --accent: var(--c-orange); }
+.concept-card[data-color="purple"] { --accent: var(--c-purple); }
+.concept-card[data-color="red"] { --accent: var(--c-red); }
+.concept-head { display: flex; align-items: center; gap: 0.6em; }
+.concept-icon {
+  flex: none;
+  width: 2.2em;
+  height: 2.2em;
+  line-height: 2.2em;
+  text-align: center;
+  font-size: 1.1em;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 13%, #fff);
+}
+.concept-title { font-weight: 700; font-size: 1.05em; color: var(--c-ink); }
+.concept-what { color: var(--c-ink); line-height: 1.6; }
+.concept-row {
+  font-size: 0.9em;
+  line-height: 1.6;
+  padding: 0.45em 0.7em;
+  border-radius: 10px;
+  color: #445566;
+}
+.concept-row > span {
+  display: block;
+  font-size: 0.8em;
+  font-weight: 700;
+  margin-bottom: 0.1em;
+}
+.concept-like { background: #FFF6E6; }
+.concept-like > span { color: #C67F0A; }
+.concept-use { background: color-mix(in srgb, var(--accent) 8%, #fff); }
+.concept-use > span { color: var(--accent); }
+
+/* ---------- 步骤时间线（```steps） ---------- */
+.markdown-section ol.step-line {
+  list-style: none;
+  margin: 1.4rem 0;
+  padding: 0;
+  position: relative;
+}
+.markdown-section ol.step-line::before {
+  content: "";
+  position: absolute;
+  left: 1.2em;
+  top: 1.2em;
+  bottom: 1.2em;
+  width: 3px;
+  background: linear-gradient(var(--c-blue), var(--c-green));
+  border-radius: 3px;
+}
+.markdown-section ol.step-line > li {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9em;
+  margin: 0 0 0.8em;
+}
+.step-no {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 2.4em;
+  height: 2.4em;
+  line-height: 2.4em;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--c-blue);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 0 4px #fff, 0 4px 12px rgba(74, 144, 217, 0.35);
+}
+.step-body {
+  flex: 1;
+  padding: 0.55em 0.9em;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--c-line);
+  box-shadow: 0 4px 14px rgba(44, 62, 80, 0.06);
+}
+.step-title { font-weight: 700; color: var(--c-ink); }
+.step-desc { font-size: 0.9em; color: #556677; margin-top: 0.2em; }
+
+/* ---------- 滚动淡入 ---------- */
+.reveal { opacity: 0; translate: 0 14px; transition: opacity 0.5s ease, translate 0.5s ease; }
+.reveal.in-view { opacity: 1; translate: 0 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; translate: none; transition: none; }
+  .code-card-dot { animation: none; }
+}
+
+@media screen and (max-width: 768px) {
+  .code-card-hint { display: none; }
+  .markdown-section blockquote.callout { padding-left: 3.2em; }
+}
