@@ -2,126 +2,169 @@
 
 ## 故事：工具箱与记忆库
 
-加一会调用工具以后，PlutoKeating 发现它的工具箱很乱：天气工具是本地函数，搜索工具走 Web API，发邮件要用公司内部 SDK，每加一个工具都要写一堆接入代码。更麻烦的是加一记不住事：用户说"刚才查了北京，再查一下上海"，加一完全不知道"刚才"指什么。
+加一的工具越来越多，每个接法都不一样，加一个就要写一堆接入代码。
+它还记性差：用户说"刚才查了北京，再查一下上海"，它不知道"刚才"指什么。
 
-本章解决两件事：
+```cards
+icon: 🔧
+title: Tool 工具
+what: 模型能调用的一个函数
+like: 像厨房设备和供应商：烤箱、秤、菜市场
+use: 加一用 `get_weather` 查天气
+color: orange
 
-| 问题 | 对应方案 |
-|------|---------|
-| 工具接入方式五花八门 | Tool 设计规范 + MCP 协议 |
-| 对话一长就忘 | Memory（记忆）机制 |
+icon: 📋
+title: MCP 协议
+what: 工具接入的统一规矩
+like: 像统一供货标准，各家用同一种送货单
+use: 加一换个应用，工具照样能用
+color: green
+
+icon: 🧠
+title: Memory 记忆
+what: 决定模型每次能看到哪些旧对话
+like: 像出餐台订单夹加老顾客档案本
+use: 加一记住用户**叫小王、爱吃辣**
+color: purple
+```
 
 ---
 
-## 第 1 部分：Tool — 工具设计原则
+## 第 1 部分：Tool — 墙上的设备说明牌
 
-工具就是一个让模型调用的函数。模型看不到函数内部，只能读到它的名字、说明和参数，所以这三样要写清楚。
+模型看不到函数内部，只读名字、说明和参数。
+好比主厨不拆烤箱，只看墙上的设备说明牌。
+一个工具只做一件事：查航班就只查航班。
 
-一个工具只做一件事。比如"查航班"工具只负责按出发地、目的地、日期查航班，不顺带订票或查天气。
+```cards
+icon: 🏷️
+title: 名字有含义
+what: 看名字就知道它干什么
+like: 说明牌写"烤箱"，主厨一看就懂
+use: `search_flights` 好过 `tool1`
+color: blue
 
-| 要求 | 原因 |
-|------|------|
-| 名字和参数名有含义（如 `search_flights`、`departure`） | 模型靠名字判断该不该用、参数填什么 |
-| 每个参数标明类型和格式（如日期写 `YYYY-MM-DD`） | 模型按格式填参数，少出错 |
-| 写清说明：做什么、每个参数的含义、返回什么 | 这段说明就是给模型看的使用手册 |
-| 出错时返回一段错误文字，不让程序崩溃 | 模型读到错误后可以换个参数重试 |
+icon: 📐
+title: 参数写清格式
+what: 每个参数标明类型和写法
+like: 领料单写明数量单位："鸡蛋 3 个"
+use: 出发日期写成 `YYYY-MM-DD`
+color: blue
+
+icon: 📖
+title: 说明写清楚
+what: 做什么、要什么、返回什么
+like: 说明牌写清：能干什么、要放什么
+use: "按城市查今天天气，返回温度"
+color: green
+
+icon: 🩹
+title: 出错返回文字
+what: 报错时返回提示文字，程序不崩
+like: 仓库没货也回话"没货"，主厨换食材
+use: 返回"城市名无效"，模型换参数重试
+color: red
+```
 
 ---
 
-## 第 2 部分：MCP — 统一的工具接入方式
+## 第 2 部分：MCP — 统一的供货标准
 
-**MCP（Model Context Protocol，模型上下文协议）** 是 Anthropic 提出的开放协议，规定 AI 应用怎样发现和调用外部工具。可以把它类比成 USB-C：以前每个工具像一种不同的充电口，MCP 定下一个统一接口，工具按这个接口提供一次，各个支持 MCP 的 Agent 都能直接用。目前 OpenAI、Google 等厂商和许多工具提供商也已支持 MCP。
+**MCP（Model Context Protocol，模型上下文协议）**：Anthropic 提出的开放协议，规定 AI 应用怎样发现和调用外部工具。OpenAI、Google 等厂商也已支持。
+好比餐厅定下统一供货标准：每家供应商都用同一种送货单，后厨不用为每家改流程。
 
-### 组成
+```cards
+icon: 🏠
+title: Host 宿主
+what: 用户直接用的 AI 应用
+like: 像餐厅本身
+use: 加一所在的聊天客户端
+color: blue
 
-| 角色 | 负责什么 |
-|------|---------|
-| Host（宿主应用） | 用户直接使用的 AI 应用，比如一个聊天客户端或 Agent 程序 |
-| Client（客户端） | Host 内部负责和某个 MCP Server 通信的模块 |
-| Server（服务端） | 把一组工具（以及数据、提示模板）按 MCP 格式提供出来 |
+icon: 🔗
+title: Client 客户端
+what: Host 里负责和 Server 通话的模块
+like: 像专门对接某一家供应商的采购员
+use: 加一里专连"天气 Server"的那一路
+color: purple
 
-### 数据怎么流动
-
-```mermaid
-sequenceDiagram
-    participant A as Agent（Host + Client）
-    participant S as MCP Server
-    A->>S: 你有哪些工具？
-    S-->>A: 工具列表（名称、说明、参数格式）
-    Note over A: 把工具列表交给模型，模型决定调用哪个
-    A->>S: 调用 get_weather，参数 city=北京
-    S-->>A: 北京 晴 25°C
+icon: 🧩
+title: Server 服务端
+what: 按 MCP 格式提供一组工具
+like: 像供应商，按标准送货
+use: 天气 Server 提供 `get_weather`
+color: green
 ```
 
-1. **发现**：Agent 向 Server 要工具列表。
-2. **选择**：Agent 把列表交给模型，模型决定调用哪个工具、填什么参数。
-3. **调用**：Agent 把调用请求发给 Server，Server 执行后返回结果。
+<div data-anim="ch05-mcp-flow"></div>
 
-Server 内部只需要两个能力：
+```steps
+icon: 🔍
+title: 发现
+desc: Agent 问 Server：你有哪些工具？
 
-```text
-列出工具()        → 返回每个工具的 名称 / 说明 / 参数格式
-调用工具(名称, 参数) → 找到对应函数并执行；找不到就返回"未知工具"
+icon: 🤔
+title: 选择
+desc: 模型看工具清单，挑一个、填好参数
+
+icon: ⚙️
+title: 调用
+desc: Server 执行工具，把结果交回 Agent
 ```
 
-新增工具时只在 Server 里注册一次，Agent 端的代码不用改。
+> **建议：** 新增工具只在 Server 注册一次，Agent 端代码不用改。
 
 ---
 
 ## 第 3 部分：Memory — 让 AI 记住事情
 
-模型本身不保存对话。每次请求时，程序要把之前的对话一起发给模型，模型才"记得"。能发进去的内容有上限，这个上限叫**上下文窗口**（模型一次能读入的最大文字量）。对话一长就装不下，最早的内容只能丢掉。Memory 机制决定保留什么、怎么保留。
+模型本身不存对话，每次都要把聊天记录一起发过去。
+好比主厨记不住这桌点过什么，服务员每次把订单记录一起递进去。
+能发的量有上限，叫**上下文窗口**（模型一次能读的最大文字量），像出餐台上的订单夹，只夹得下几张。
 
-```text
-用户：帮我查一下北京的天气。
-加一：北京今天晴，25°C。
-用户：那上海呢？        ← "那"指天气，加一必须看到上一轮才能理解
+<div data-anim="ch05-context-window"></div>
+
+*订单夹满了，新单进来旧单被挤掉，模型就忘了。*
+
+```cards
+icon: 📝
+title: 短期记忆
+what: 只留最近 N 轮，更早的丢掉
+like: 像订单夹，新单进来，最旧那张被挤掉
+use: 用户问"那上海呢"，加一看得到上一轮
+color: blue
+
+icon: 📒
+title: 长期记忆
+what: 旧对话的要点存到外面，用时取回
+like: 像老顾客档案本：爱吃辣、忌口
+use: 下次聊天，加一还记得用户爱吃辣
+color: green
+
+icon: 🧭
+title: 记忆检索
+what: 按意思相近程度找出相关要点
+like: 按口味坐标翻档案本，只取相关几条
+use: 问"晚饭吃啥"，找出"爱吃辣"
+color: purple
 ```
 
-### 短期记忆与长期记忆
+<div data-anim="ch05-memory-recall"></div>
 
-| 类型 | 做法 | 适合场景 |
-|------|------|---------|
-| 短期记忆 | 只保留最近 N 轮对话，更早的自动丢弃（滑动窗口） | 当前这段对话的上下文 |
-| 长期记忆 | 定期把历史对话总结成摘要存起来，需要时按相关度取回 | 跨很多轮或跨会话的信息，如用户姓名、偏好 |
-
-### 一次带记忆的对话流程
-
-```text
-用户输入
-   │
-   ▼
-存入短期记忆（最近 N 轮，超出的最早几条被挤掉）
-   │
-   ▼
-按用户问题去长期记忆库检索相关摘要
-   │
-   ▼
-拼成请求：系统提示 + 相关摘要 + 最近 N 轮对话 + 本次问题
-   │
-   ▼
-发给模型 → 得到回复 → 回复也存入短期记忆
-   │
-   ▼
-每隔 N 轮：让模型把这几轮对话总结成摘要 → 存入长期记忆库
-```
-
-长期记忆的"按相关度取回"通常用向量检索：把摘要和问题都转成一串数字（向量），数字越接近表示意思越相近，取最接近的几条。这和第 3 章 RAG 的检索方法相同。
+*长期记忆像老顾客档案本：要点记下来，用时翻出相关几条。检索方法和第 3 章 RAG 相同。*
 
 ---
 
-## Tool、MCP、Memory 的关系
+## 三者的关系
 
 ```mermaid
 flowchart TB
     Agent["Agent"]
-    Agent --> Tool["Tool：能做什么<br/>具体功能的实现"]
-    Agent --> MCP["MCP：怎么接入<br/>统一的工具发现与调用"]
-    Agent --> Memory["Memory：记住什么<br/>管理放进上下文的内容"]
+    Agent --> Tool["Tool：能做什么"]
+    Agent --> MCP["MCP：怎么接入"]
+    Agent --> Memory["Memory：记住什么"]
     MCP --> Tool
 ```
-
-Tool 提供具体功能，MCP 把这些功能用统一格式交给 Agent，Memory 决定每次请求时模型能看到哪些历史信息。
 
 ---
 
@@ -145,23 +188,20 @@ Tool 提供具体功能，MCP 把这些功能用统一格式交给 Agent，Memor
 
 ## 检查清单
 
-完成本章后，你应该能：
-
-- [ ] 说出一个好工具要写清楚的几项内容
-- [ ] 说出 MCP 的三个角色和"发现 → 选择 → 调用"流程
+- [ ] 说出一个好工具要写清楚哪几项
+- [ ] 说出 MCP 的三个角色和"发现 → 选择 → 调用"
 - [ ] 说出短期记忆和长期记忆的区别
-- [ ] 画出一次带记忆的对话中，数据经过哪些步骤
 
 ---
 
 ## 📚 参考资料
 
-- [MCP 官方网站](https://modelcontextprotocol.io/) — Model Context Protocol 官方站点，包含入门指南和文档
-- [MCP 规范](https://spec.modelcontextprotocol.io/) — MCP 协议完整规范文档
-- [Anthropic MCP 公告](https://www.anthropic.com/news/model-context-protocol) — Anthropic 发布 MCP 的官方公告
-- [MCP GitHub](https://github.com/modelcontextprotocol) — MCP 开源仓库，包含 SDK 和示例
-- [LangGraph Memory Concepts](https://langchain-ai.github.io/langgraph/concepts/memory/) — LangGraph 框架中的记忆机制概念
-- [LangChain Tool Concepts](https://python.langchain.com/docs/concepts/tools/) — LangChain 框架中的工具概念与用法
+- [MCP 官方网站](https://modelcontextprotocol.io/) — 入门指南和文档
+- [MCP 规范](https://spec.modelcontextprotocol.io/) — 协议完整规范
+- [Anthropic MCP 公告](https://www.anthropic.com/news/model-context-protocol) — 发布 MCP 的官方公告
+- [MCP GitHub](https://github.com/modelcontextprotocol) — 开源仓库，含 SDK 和示例
+- [LangGraph Memory Concepts](https://langchain-ai.github.io/langgraph/concepts/memory/) — LangGraph 的记忆机制概念
+- [LangChain Tool Concepts](https://python.langchain.com/docs/concepts/tools/) — LangChain 的工具概念
 
 > **加一说：** "我的工具箱整齐了，记忆系统也装上了。可有些任务太复杂，我一个人忙不过来……也许我需要几个小伙伴来帮忙。"
 
