@@ -28,11 +28,15 @@
     });
   }
 
-  // 行内 `代码` 和 **加粗**
+  // 行内 `代码`、**加粗** 和 [链接](https://…)
   function inline(t) {
     return esc(t)
       .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\[([^\]]+)\]\(((?:https?:\/\/|#\/|\/)[^)\s"]+)\)/g, function (_, label, href) {
+        var ext = /^https?:/.test(href);
+        return '<a href="' + href + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + label + '</a>';
+      });
   }
 
   // 把 "key: value" 行按空行分组
@@ -54,6 +58,10 @@
     var items = parseGroups(codeText(pre));
     var grid = document.createElement('div');
     grid.className = 'concept-grid';
+    // 按数量选列数，避免最后一行只剩一张卡
+    var n = items.length;
+    var cols = n <= 3 ? n : (n % 3 === 0 ? 3 : (n % 2 === 0 ? 2 : 3));
+    grid.style.setProperty('--cols', cols);
     items.forEach(function (it, i) {
       var color = COLORS.indexOf(it.color) >= 0 ? it.color : COLORS[i % COLORS.length];
       var html = '<div class="concept-head"><span class="concept-icon">' + esc(it.icon || '🔹') + '</span>' +

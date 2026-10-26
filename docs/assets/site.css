@@ -37,6 +37,26 @@
   box-shadow: 0 0 0 4px rgba(245, 166, 35, 0.18);
 }
 
+/* ---------- Mermaid 图卡片 ---------- */
+.markdown-section .mermaid {
+  margin: 1.4rem 0;
+  padding: 1.2rem 1rem;
+  text-align: center;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle, rgba(74, 144, 217, 0.10) 1px, transparent 1.2px) 0 0 / 18px 18px,
+    #FCFDFF;
+  border: 2px solid #E1E8F0;
+  box-shadow: 0 8px 24px rgba(44, 62, 80, 0.07);
+  overflow-x: auto;
+}
+.markdown-section .mermaid svg { max-width: 100%; height: auto; }
+.markdown-section .mermaid .node rect,
+.markdown-section .mermaid .node polygon,
+.markdown-section .mermaid .cluster rect { rx: 10px; ry: 10px; }
+.markdown-section .mermaid .nodeLabel,
+.markdown-section .mermaid .edgeLabel { font-weight: 600; }
+
 /* ---------- 代码卡片 ---------- */
 .code-card {
   --accent: var(--c-blue);
@@ -207,7 +227,7 @@
 /* ---------- 概念卡片（```cards） ---------- */
 .concept-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
   gap: 16px;
   margin: 1.4rem 0;
 }
@@ -319,6 +339,7 @@
 }
 
 @media screen and (max-width: 768px) {
+  .concept-grid { grid-template-columns: 1fr; }
   .code-card-hint { display: none; }
   .markdown-section blockquote.callout { padding-left: 3.2em; }
 }

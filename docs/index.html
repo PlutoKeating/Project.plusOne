@@ -129,10 +129,40 @@
   <script src="//cdn.jsdelivr.net/npm/marked@4"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-katex@latest/dist/docsify-katex.js"></script>
 
-  <!-- 2. Mermaid v10 classic build (synchronous). docsify-mermaid@2 calls mermaid.run(), which v9 does not have -->
-  <script src="//cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+  <!-- 2. Mermaid v11 classic build (synchronous). docsify-mermaid@2 calls mermaid.run(); v11 adds the hand-drawn look -->
+  <script src="//cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
   <script>
-    mermaid.initialize({ startOnLoad: false });
+    // 与站点配色一致的手绘风主题
+    mermaid.initialize({
+      startOnLoad: false,
+      look: 'handDrawn',
+      handDrawnSeed: 7,
+      theme: 'base',
+      fontFamily: '"PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif',
+      themeVariables: {
+        fontSize: '15px',
+        background: '#ffffff',
+        primaryColor: '#EAF3FC',
+        primaryBorderColor: '#4A90D9',
+        primaryTextColor: '#2C3E50',
+        secondaryColor: '#E9F7F0',
+        secondaryBorderColor: '#3DB37A',
+        tertiaryColor: '#FFF6E6',
+        tertiaryBorderColor: '#F5A623',
+        lineColor: '#5B6B7B',
+        textColor: '#2C3E50',
+        clusterBkg: '#FFFBF2',
+        clusterBorder: '#F5A623',
+        edgeLabelBackground: '#ffffff',
+        actorBkg: '#EAF3FC',
+        actorBorder: '#4A90D9',
+        signalColor: '#5B6B7B',
+        noteBkgColor: '#FFF6E6',
+        noteBorderColor: '#F5A623'
+      },
+      flowchart: { curve: 'basis', padding: 14, nodeSpacing: 40, rankSpacing: 50, htmlLabels: true },
+      sequence: { mirrorActors: false, actorMargin: 60 }
+    });
   </script>
 
   <!-- 3. 页面视觉组件（卡片化），需在 Docsify 渲染前定义 -->
