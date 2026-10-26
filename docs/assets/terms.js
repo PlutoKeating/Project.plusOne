@@ -43,7 +43,7 @@
   }
 
   var SKIP = 'pre, code, a, h1, h2, h3, h4, h5, script, style, .mermaid, [data-anim], .katex, .term, ' +
-    '.code-card-head, .concept-title, .concept-row > span, .step-no, .footer-feedback';
+    '.code-card-head, .concept-title, .concept-label, .step-no, .footer-feedback';
   var BLOCK = 'p, li, td, th, blockquote, .concept-what, .concept-row, .step-title, .step-desc';
 
   function markTerms(section) {

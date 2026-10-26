@@ -269,16 +269,16 @@
   border-radius: 10px;
   color: #445566;
 }
-.concept-row > span {
+.concept-row > .concept-label {
   display: block;
   font-size: 0.8em;
   font-weight: 700;
   margin-bottom: 0.1em;
 }
 .concept-like { background: #FFF6E6; }
-.concept-like > span { color: #C67F0A; }
+.concept-like > .concept-label { color: #C67F0A; }
 .concept-use { background: color-mix(in srgb, var(--accent) 8%, #fff); }
-.concept-use > span { color: var(--accent); }
+.concept-use > .concept-label { color: var(--accent); }
 
 /* ---------- 步骤时间线（```steps） ---------- */
 .markdown-section ol.step-line {

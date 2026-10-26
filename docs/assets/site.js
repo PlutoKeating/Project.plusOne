@@ -67,8 +67,8 @@
       var html = '<div class="concept-head"><span class="concept-icon">' + esc(it.icon || '🔹') + '</span>' +
         '<span class="concept-title">' + inline(it.title) + '</span></div>';
       if (it.what) html += '<div class="concept-what">' + inline(it.what) + '</div>';
-      if (it.like) html += '<div class="concept-row concept-like"><span>🍎 打个比方</span>' + inline(it.like) + '</div>';
-      if (it.use) html += '<div class="concept-row concept-use"><span>🎯 用在哪</span>' + inline(it.use) + '</div>';
+      if (it.like) html += '<div class="concept-row concept-like"><span class="concept-label">🍎 打个比方</span>' + inline(it.like) + '</div>';
+      if (it.use) html += '<div class="concept-row concept-use"><span class="concept-label">🎯 用在哪</span>' + inline(it.use) + '</div>';
       var card = document.createElement('div');
       card.className = 'concept-card reveal';
       card.setAttribute('data-color', color);
