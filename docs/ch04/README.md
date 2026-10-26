@@ -2,7 +2,7 @@
 
 ## 故事：从"说话"到"做事"
 
-加一能聊天，也能查资料了。可用户让它"查今天的天气""算这个月的销售额""给张三发封邮件"，它只能回一句"抱歉，我只能提供文字回答"。PlutoKeating 决定给加一装上"双手"：让它能调用外部功能去做事。能做事的 AI，就叫 **Agent（智能体）**。
+用户让加一查天气、发邮件，它只会回"抱歉，我只会说话"。PlutoKeating 给它装上"双手"。能动手做事的 AI，叫 **Agent（智能体）**。
 
 ---
 
@@ -12,55 +12,74 @@
 Agent = Chatbot + Tools + Loop
 ```
 
-| 组件 | 含义 | 在加一身上 |
-|------|------|-----------|
-| Chatbot | 能对话的大语言模型（LLM） | 大脑：负责思考和决定 |
-| Tools | 模型可以请求调用的外部功能，如搜索、计算、发邮件 | 双手：负责执行 |
-| Loop | 思考 → 行动 → 观察结果 → 再思考，反复进行 | 把大脑和双手串起来 |
+```cards
+icon: 🧠
+title: Chatbot
+what: 会聊天的大语言模型（LLM）
+like: 只会口头报菜名、不能下厨的主厨
+use: 判断"查天气"要不要用工具
+color: blue
 
-Agent 的核心在于这个循环，用哪个框架都可以。
+icon: 🔧
+title: Tools 工具
+what: 程序能调用的外部功能
+like: 厨房设备和供应商：烤箱、秤、菜市场
+use: `get_weather` 查北京天气
+color: orange
+
+icon: 🔁
+title: Loop 循环
+what: 想一步、做一步、看结果，再想
+like: 主厨开单、帮厨取料，反复到出菜
+use: 查不到就换个关键词再搜
+color: green
+```
 
 ---
 
-## 循环架构
+## 循环怎么转
 
 <div data-anim="ch04-react-loop"></div>
 
-```mermaid
-flowchart TD
-    A[用户提问] --> B[LLM 思考：下一步做什么？]
-    B --> C{需要工具吗？}
-    C -- 否 --> F[输出最终回答]
-    C -- 是 --> D[程序执行工具<br/>搜索 / 计算 / 调接口]
-    D --> E[把工具结果放回对话]
-    E --> B
+```cards
+icon: 🔄
+title: ReAct
+what: 推理（Reasoning）和行动（Acting）交替
+like: 做一步、尝一口，再定下一步
+use: 先查天气，再决定要不要提醒带伞
+color: blue
+
+icon: 📜
+title: 对话记录
+what: 程序保存的一串消息
+like: 这道菜的操作记录本，每步都记上
+use: 问题、LLM 的决定、工具结果都在里面
+color: purple
 ```
-
-这种"推理一步、行动一步"交替进行的模式叫 **ReAct**（Reasoning + Acting，推理 + 行动）。
-
-每一块的职责：
-
-| 部分 | 谁来做 | 负责什么 |
-|------|--------|----------|
-| 思考 | LLM | 读对话记录，决定直接回答还是调用哪个工具、传什么参数 |
-| 执行 | 你的程序 | 按 LLM 给出的工具名和参数，去调接口、查数据库 |
-| 观察 | 你的程序 | 把工具返回的结果追加到对话记录里，交回给 LLM |
-| 对话记录 | 程序维护的消息列表 | 保存用户问题、LLM 的每次决定、每次工具结果，是循环里流动的数据 |
 
 ---
 
-## Function Calling：四步交互
+## Function Calling：四步来回
 
-Function Calling（函数调用）是让 LLM "用上工具"的机制。整个过程分四步：
+<div data-anim="ch04-function-calling"></div>
 
-```text
-① 程序 → LLM ：发送用户问题 + 工具清单（每个工具的名字、用途说明、参数说明）
-② LLM → 程序 ：返回一个调用请求，例如 { 工具: get_weather, 参数: { city: "北京" } }
-③ 程序        ：在本地执行 get_weather("北京")，得到 "晴，25°C"
-④ 程序 → LLM ：把 "晴，25°C" 发回去，LLM 据此继续思考，或直接写出回答
+```cards
+icon: 📞
+title: Function Calling
+what: 让 LLM 能"点名"工具的机制
+like: 主厨开领料单，帮厨照单去取
+use: LLM 写出 `get_weather(北京)`
+color: orange
+
+icon: 📋
+title: 工具清单
+what: 每个工具的名字、用途、参数
+like: 墙上的设备说明牌，主厨照着挑
+use: 第 ① 步随问题一起发给 LLM
+color: blue
 ```
 
-LLM 自己不运行任何代码。它只输出"该调哪个工具、传什么参数"，执行工具的是你的程序。第 ④ 步之后如果 LLM 又发出调用请求，就回到第 ② 步，这就是上面那张图里的循环。
+> **注意：** LLM 不运行代码。第 ④ 步后它若又要工具，就回到第 ② 步。
 
 ---
 
@@ -70,67 +89,82 @@ LLM 自己不运行任何代码。它只输出"该调哪个工具、传什么参
 对话记录 = [用户问题]
 for 第几步 in range(最多步数):
     回复 = LLM(对话记录, 工具清单)
-    if 回复 是 最终回答:
-        return 回复
-    for 调用 in 回复.工具调用列表:
-        try:
-            结果 = 执行工具(调用.工具名, 调用.参数)
-        except 出错 as 错误:
-            结果 = "工具出错：" + 错误
+    if 回复 是 最终回答: return 回复
+    for 调用 in 回复.工具调用:
+        结果 = 执行工具(调用)        # 出错时，错误信息就是结果
         对话记录.追加(调用, 结果)
 return "步数用完，请简化问题后重试"
 ```
 
-这里有两处保护：`最多步数` 防止 Agent 无限循环；`try` 让工具失败时把错误信息交给 LLM 处理，程序不会直接崩溃。
+<div data-anim="ch04-max-steps"></div>
+
+```cards
+icon: ⛔
+title: 最多步数
+what: 循环最多绕几圈
+like: 一道菜最多返工 N 次，超了向顾客说明
+use: 搜索一直超时，绕 5 圈就停
+color: red
+
+icon: 🩹
+title: 错误当结果
+what: 工具报错时，把错误交回 LLM
+like: 仓库没货也回话"没货"，主厨换食材
+use: LLM 看到"超时"，改用别的工具
+color: green
+```
 
 ---
 
 ## 设计 Agent 的四条原则
 
-| 原则 | 做法 | 例子 |
-|------|------|------|
-| 工具要小 | 一个工具只做一件事 | 拆成 `search_web`、`send_email`、`calculate`，不要做一个万能的 `do_everything` |
-| 描述要清楚 | LLM 靠工具描述选工具，描述越具体越容易选对 | "搜索" 太模糊；"搜索互联网获取最新信息，适用于查新闻、实时数据" 更好 |
-| 限制步数 | 给循环设上限 | 最多 5 步，超过就停止并提示用户 |
-| 处理失败 | 网络超时、接口报错、参数不合法都要接住 | 把错误作为工具结果交回 LLM |
+```cards
+icon: 🔩
+title: 工具要小
+what: 一个工具只做一件事
+like: 一台设备一件事：烤箱烤、秤称重
+use: `search_web`、`send_email` 分开
+color: blue
 
-> **Anthropic 的建议：** 最有效的 Agent 往往结构最简单。先从单次 LLM 调用开始，确认需要时再逐步加入工具、多 Agent 等复杂度。设计过度的 Agent 难维护，行为也更难预测。
+icon: 🏷️
+title: 描述要清楚
+what: LLM 靠描述挑工具
+like: 设备说明牌写清能干什么、放什么
+use: "查新闻和实时数据"比"搜索"好挑
+color: purple
+
+icon: 🔢
+title: 限制步数
+what: 给循环设上限
+like: 最多返工 N 次，超了向顾客说明
+use: 加一最多绕 5 圈
+color: orange
+
+icon: 🧯
+title: 接住失败
+what: 超时、报错都要处理
+like: 仓库没货也要回话，后厨不停摆
+use: 错误当结果交回 LLM
+color: red
+```
+
+> **建议：** Anthropic 发现，好用的 Agent 往往结构最简单。先用单次 LLM 调用，需要时再加工具。
 
 ---
 
 ## 🤖 向 AI 提问
 
-### 设计工具
+> "我想给 Agent 加一个搜索网页的工具，请帮我设计接口和参数。"
 
-> **向 AI 提问：** "我想给我的 Agent 添加一个搜索网页的工具。请帮我设计工具的接口、参数和实现代码。"
-
-### 理解 Agent 循环
-
-> **向 AI 提问：** "请用伪代码解释 ReAct 模式的 Agent 循环，帮我理清 reasoning 和 acting 是怎么交替进行的。"
-
-### 调试 Tool Calling
-
-> **向 AI 提问：** "我的工具调用没有触发，LLM 直接回答了而没有调用工具。这是我的工具定义：[贴代码]。可能是什么原因？"
-
-### Prompt 模板
-
-```text
-角色：你是一个 Agent 系统开发者
-任务：帮我设计一个 [场景] 场景下的 Agent 工具集
-场景：例如"一个客服 Agent，需要查询订单、退货、物流信息"
-要求：给出每个工具的 name, description, parameters（JSON Schema 格式）
-输出格式：按优先级排序的工具列表，附带选择理由
-```
+> "LLM 直接回答了，没有调用工具。这是我的工具定义：[贴代码]。可能是什么原因？"
 
 ---
 
 ## 检查清单
 
-完成本章后，你应该能：
-
 - [ ] 用自己的话解释 Agent = Chatbot + Tools + Loop
-- [ ] 画出 ReAct 循环：思考 → 调用工具 → 观察结果 → 再思考
-- [ ] 说清 Function Calling 的四步交互，以及哪一步由 LLM 做、哪一步由程序做
+- [ ] 画出 ReAct 循环：思考 → 调用工具 → 看结果 → 再思考
+- [ ] 说清 Function Calling 四步里，哪步 LLM 做、哪步程序做
 - [ ] 说出设计工具的四条原则
 
 ---
@@ -143,7 +177,7 @@ return "步数用完，请简化问题后重试"
 - [OpenAI Function Calling Docs](https://platform.openai.com/docs/guides/function-calling) — OpenAI 官方 Function Calling 文档
 - [LangChain Agent Concepts](https://python.langchain.com/docs/concepts/agents/) — LangChain 框架中的 Agent 概念与用法
 
-> **加一说：** "我现在会做事了。可工具越来越多，每个接入方式都不一样；而且跟用户聊完就忘。我需要一套工具箱规范和一个记忆系统。"
+> **加一说：** "我会做事了。可工具越来越多，接法各不相同；而且聊完就忘。我需要一套工具箱规范和一个记忆系统。"
 
 ---
 
