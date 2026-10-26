@@ -126,7 +126,7 @@ export const Card: React.FC<{
         {label}
       </div>
       {sub ? (
-        <div style={{ fontSize: fontSize * 0.7, marginTop: 6, opacity: 0.85, lineHeight: 1.3 }}>
+        <div style={{ fontSize: Math.max(24, fontSize * 0.75), marginTop: 6, opacity: 0.85, lineHeight: 1.3 }}>
           {sub}
         </div>
       ) : null}
