@@ -343,3 +343,65 @@
   .code-card-hint { display: none; }
   .markdown-section blockquote.callout { padding-left: 3.2em; }
 }
+
+/* ---------- 术语下划线与悬浮卡（assets/terms.js） ---------- */
+.markdown-section .term {
+  cursor: help;
+  text-decoration: underline dashed var(--c-purple);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+.markdown-section .term:hover,
+.markdown-section .term:focus-visible {
+  background: color-mix(in srgb, var(--c-purple) 12%, transparent);
+  outline: none;
+}
+.term-pop {
+  position: fixed;
+  z-index: 100;
+  width: min(320px, calc(100vw - 16px));
+  padding: 0.9em 1em 0.8em;
+  border-radius: 14px;
+  background: #fff;
+  border: 2px solid var(--c-purple);
+  box-shadow: 0 14px 34px rgba(44, 62, 80, 0.18);
+  color: var(--c-ink);
+  font-size: 14px;
+  line-height: 1.6;
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 6px;
+  transition: opacity 0.18s ease, translate 0.18s ease, visibility 0.18s;
+}
+.term-pop.show { opacity: 1; visibility: visible; translate: 0 0; }
+.term-pop::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: calc(var(--arrow-x, 50%) - 7px);
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-left: 2px solid var(--c-purple);
+  border-top: 2px solid var(--c-purple);
+  rotate: 45deg;
+}
+.term-pop.above::before { top: auto; bottom: -8px; rotate: 225deg; }
+.term-pop-title { font-weight: 700; font-size: 15px; color: var(--c-purple); margin-bottom: 0.3em; }
+.term-pop-aka { margin-left: 0.5em; font-weight: 400; font-size: 12px; color: var(--c-muted); }
+.term-pop-like {
+  margin-top: 0.5em;
+  padding: 0.4em 0.65em;
+  border-radius: 10px;
+  background: #FFF6E6;
+  font-size: 13px;
+}
+.term-pop-like > span { display: block; font-size: 11px; font-weight: 700; color: #C67F0A; }
+.term-pop-links { display: flex; gap: 1em; margin-top: 0.6em; font-size: 13px; }
+.term-pop-links a { color: var(--c-blue); font-weight: 600; text-decoration: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .term-pop { transition: none; }
+}

@@ -94,9 +94,10 @@
       formatUpdated: '{YYYY}-{MM}-{DD}',
       plugins: [
         function(hook) {
-          // 每次页面渲染完：把代码块/引用块/表格包装成卡片，再把 <div data-anim="id"></div> 挂载成动画播放器
+          // 每次页面渲染完：把代码块/引用块/表格包装成卡片，给术语加悬浮解释，再把 <div data-anim="id"></div> 挂载成动画播放器
           hook.doneEach(function() {
             if (window.PlusOneDecorate) window.PlusOneDecorate();
+            if (window.PlusOneTerms) window.PlusOneTerms();
             if (window.PlusOneAnim) window.PlusOneAnim.mountAll();
           });
         },
@@ -167,6 +168,7 @@
 
   <!-- 3. 页面视觉组件（卡片化），需在 Docsify 渲染前定义 -->
   <script src="assets/site.js"></script>
+  <script src="assets/terms.js"></script>
 
   <!-- 4. Core Docsify -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
